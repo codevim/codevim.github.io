@@ -12,8 +12,8 @@ commit_files() {
 }
 
 push() {
-    git remote add origin-pages https://${GH_TOKEN}@github.com/codvim/codvim.github.io.git > /dev/null 2>&1
-    git push quiet -u origin-pages master
+    git remote add origin-pages https://${GH_TOKEN}@github.com/codevim/codevim.github.io.git 
+    git push -u origin-pages master
 }
 
 setup_git
