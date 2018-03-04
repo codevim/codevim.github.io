@@ -1,0 +1,17 @@
+language: go
+go:
+  - "1.10"
+branches:
+  only:
+    - source
+
+cache:
+  go: true
+
+before_install:
+  - git config --global user.name "codevim"
+  - git congig --global user.email "memory.me@outlook.com"
+  - go get -t github.com/spf13/hugo
+
+scripts:
+  - hugo -t hyde --baseUrl="https://codvim.github.io"
