@@ -12,7 +12,7 @@ script:
   - bin/hugo -t hyde --baseUrl="https://codvim.github.io"
 after_success:
   - ls -al
-  - cd publish
+  - cd public
   - sh .travis/push.sh
 env:
   global:
