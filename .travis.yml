@@ -8,16 +8,16 @@ branches:
 cache:
   go: true
 
-before_install:
-  - git config --global user.name "codevim"
-  - git config --global user.email "memory.me@outlook.com"
+install:
   - wget https://github.com/gohugoio/hugo/releases/download/v0.37/hugo_0.37_Linux-32bit.tar.gz -O /tmp/hugo.tar.gz
   - mkdir -p bin
   - tar -xvf /tmp/hugo.tar.gz -C bin
   - export PATH=$PATH:$PWD/bin/hugo
 
-scripts:
+script:
   - hugo -t hyde --baseUrl="https://codvim.github.io"
 
 after_success:
+  - git config --global user.name "codevim"
+  - git config --global user.email "memory.me@outlook.com"
   - echo "success"
