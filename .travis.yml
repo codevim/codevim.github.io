@@ -1,22 +1,18 @@
 language: go
 go:
-  - "1.10"
+  - '1.10'
 branches:
   only:
-    - source
-
-cache:
-  go: true
-
+  - source
 install:
   - wget https://github.com/gohugoio/hugo/releases/download/v0.37/hugo_0.37_Linux-32bit.tar.gz -O /tmp/hugo.tar.gz
   - mkdir -p bin
   - tar -xvf /tmp/hugo.tar.gz -C bin
-
 script:
   - bin/hugo -t hyde --baseUrl="https://codvim.github.io"
-
 after_success:
-  - git config --global user.name "codevim"
-  - git config --global user.email "memory.me@outlook.com"
-  - echo "success"
+  - cd publish
+  - .travis/push.sh
+env:
+  global:
+    secure: GUqg8XnU3vkzukA/zVcYSPq7DKP1iPH09U7mDKMJrFb48SPMVl3M95d/6y8uEkJ4W04wmYM1PFWQnb98A2+iKNsLRtn99wINmNQwz/b2pV4vePbHug2WdcjaEqPeGWPoQG/4odJhTbmJLC2zkMVdMRbCpY9IjKGCNwjRGKsJZabQQHLWWfiTYCgWaMSlGXbH/d4dzR7fPkl1/Fl1teHwyUtM9FRWgbzyj0NKiyxbB6Br72cBL1z8SP0kOPNhnVWOMgqFnS9jnl5gZ1FDa0b9ga1M+s1bowcZXoGicKM2GMzGu/nVGriHWWQ6sUkZEMSj7WeBYMcZvNpnXXjoAqlcFOgi0hdxmvX6bBsER9PG2VUa79jrP04d5Vlq5NIniXfahIKIev0PJ+L6aeNBIpqgcGC8OJeTdzTu9v17Y4wdXEmi6O4+W9BX2ahPH2us9JDqze0R2ueaInwFzhy4HD3jSWMKYBBrKpbJMHjK4jLcg8oTg8X5TzdbC+zv5vK1OI+uowz4AevTUrwtleHdeMlmjkUuvDY2SmgrHITsVeKoNg6HVY7R5LAXQtdJ30n6d0GfIpHuJlDWH+hcOPycSA8EEaKsHVi8gj9BHv6JZHMBtRbHqJGkS+b4LVBzW+hwfrFBizV/ne6/ultLjprYkey5r6d0ulWiq95mJ8tXBaqZNYg=
