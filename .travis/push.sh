@@ -16,6 +16,7 @@ push() {
     git push -u origin-pages master
 }
 
+cd public
 setup_git
 commit_files
 push
