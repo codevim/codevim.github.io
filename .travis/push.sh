@@ -12,8 +12,9 @@ commit_files() {
 }
 
 push() {
+    git init
     git remote add origin-pages https://${GH_TOKEN}@github.com/codevim/codevim.github.io.git 
-    git push -u origin-pages master
+    git push -f -u origin-pages master
 }
 
 cd public
