@@ -9,7 +9,7 @@ install:
   - mkdir -p bin
   - tar -xvf /tmp/hugo.tar.gz -C bin
 script:
-  - bin/hugo -t hyde --baseUrl="https://codvim.github.io"
+  - bin/hugo
 after_success:
   - ls -al
   - sh .travis/push.sh
