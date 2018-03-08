@@ -2,6 +2,7 @@ baseURL = "https://codevim.github.io"
 languageCode = "zhc-cn"
 title = "天外天 My Site"
 hasCJKLanguage = true
+theme = "ink"
 
 disqusShortName = "codevim"
 
@@ -11,6 +12,7 @@ pygmentsCodeFences = true
 pygmentsCodeFencesGuessSyntax = true
 
 paginate = 5
+
 
 [Permalinks]
     post = "/post/:year/:filename"
