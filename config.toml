@@ -1,0 +1,32 @@
+baseURL = "http://example.org/"
+languageCode = "en-us"
+title = "天外天 My Site"
+hasCJKLanguage = true
+
+disqusShortName = "evercoding"
+
+# syntax highlight
+pygmentsUseClasses = true
+pygmentsCodeFences = true
+pygmentsCodeFencesGuessSyntax = true
+
+paginate = 2
+
+[Permalinks]
+    post = "/post/:year/:filename"
+    tags = "/tags/:title"
+
+[params]
+    # see https://gohugo.io/functions/format/
+    dateFormat = "2006.1.2"
+
+    [[params.nav]]
+    name = "home"
+    url = "/"
+    [[params.nav]]
+    name = "tags"
+    url = "/tags"
+    [[params.nav]]
+    name = "project"
+    url = "https://github.com"
+

@@ -1,0 +1,19 @@
+<div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">{{ .Site.Title }}</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                {{ range .Site.Params.Nav }}
+                <div class="u-link nav-item">
+                    <a href="{{ .url }}">{{ .name }}</a>
+                </div>
+                {{ end }}
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>

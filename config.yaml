@@ -1,5 +1,9 @@
 baseURL: "https://codevim.github.io/"
 languageCode: "zh-cn"
-title: "My New Hugo Site"
+title: "My New Hugo"
 metaDataFormat: "yaml"
-theme: hyde
+hasCJKLanguage: true
+theme: ink
+disableUrlToLowercase: false
+params:
+  DateFormat: "2006.1.2"
