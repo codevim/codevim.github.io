@@ -1,5 +1,5 @@
-baseURL = "http://example.org/"
-languageCode = "en-us"
+baseURL = "https://codevim.github.io"
+languageCode = "zhc-cn"
 title = "天外天 My Site"
 hasCJKLanguage = true
 
@@ -10,7 +10,7 @@ pygmentsUseClasses = true
 pygmentsCodeFences = true
 pygmentsCodeFencesGuessSyntax = true
 
-paginate = 2
+paginate = 5
 
 [Permalinks]
     post = "/post/:year/:filename"
