@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Parsec on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/parsec/</link>
+    <description>Recent content in Parsec on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Wed, 20 Jan 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/parsec/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Haskell Parsec的简短介绍[译]</title>
+      <link>https://codevim.github.io/post/2016/2016-01-20-an-introduction-to-parsing-text-in-haskell-with-parsec/</link>
+      <pubDate>Wed, 20 Jan 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2016/2016-01-20-an-introduction-to-parsing-text-in-haskell-with-parsec/</guid>
+      <description>本文翻译自http://unbui.lt/#!/post/haskell-parsec-basics/。这是我第一次翻译文章，这篇文章的英文</description>
+    </item>
+    
+  </channel>
+</rss>

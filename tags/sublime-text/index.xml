@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Sublime Text on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/sublime-text/</link>
+    <description>Recent content in Sublime Text on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Wed, 20 Mar 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/sublime-text/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>自己写sublime text插件</title>
+      <link>https://codevim.github.io/post/2013/2013-03-20-a-sublime-text-plugin/</link>
+      <pubDate>Wed, 20 Mar 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-03-20-a-sublime-text-plugin/</guid>
+      <description>起因是，自己写Python基本上使用sublime text 2。但是，文件头部的代码 #! /usr/bin/env python # -*- coding: utf-8 -*- 如果每次都要敲的话，很麻烦。而如果不敲的化，一旦</description>
+    </item>
+    
+  </channel>
+</rss>

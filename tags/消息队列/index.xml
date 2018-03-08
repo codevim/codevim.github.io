@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>消息队列 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</link>
+    <description>Recent content in 消息队列 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Thu, 17 Jul 2014 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ActiveMQ笔记</title>
+      <link>https://codevim.github.io/post/2014/2014-07-17-activemq-note/</link>
+      <pubDate>Thu, 17 Jul 2014 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2014/2014-07-17-activemq-note/</guid>
+      <description>实验室的项目需要使用ActiveMQ，目的是为了进行一些耗时间的处理时，不会阻塞程序的主流程。调研ActiveMQ的工作就交给我来做了。 我们</description>
+    </item>
+    
+  </channel>
+</rss>

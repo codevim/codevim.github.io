@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>在Jekyll中用SyntaxHighlighter高亮代码 | 天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-single">
+    <div class="post">    
+    <h1 class="post-title">在Jekyll中用SyntaxHighlighter高亮代码</h1>
+    <div class="post-meta">
+    <span class="post-date">2012.11.30</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jekyll">Jekyll</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/syntaxhighlighter">SyntaxHighlighter</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE">代码高亮</a>
+        </span>
+        
+    
+</div>
+    <div class="post-content">
+        <p>前几天把博客里的代码高亮改成[SyntaxHighligher][]了，感觉好了很多，看着也舒服，关键是复制代码的时候，行号连着代码在一行复制了。主要参考了官网给的这个链接<a href="http://www.cyberack.com/2007/07/adding-syntax-highlighter-to-blogger.html">Adding a Syntax Highlighter to your Blogger blog</a>。Jekyll的灵活性应该比Blogger更大，而且直接贴改代码，所以对于Jekyll这个方法是合适的。下面是具体的过程</p>
+
+<p>在Jekyll的模板页里的head里面，添加如下代码，选自己需要的语言的刷子就好</p>
+<div class="highlight"><pre class="chroma">&lt;link href=&#39;/static/css/syntaxhighlighter/shCore.css&#39; rel=&#39;stylesheet&#39; type=&#39;text/css&#39;/&gt;
+&lt;link href=&#39;/static/css/syntaxhighlighter/shThemeDefault.css&#39; rel=&#39;stylesheet&#39; type=&#39;text/css&#39;/&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shCore.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;!-- The Following is styles for different language  --&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushBash.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushCpp.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushCSharp.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushCss.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushJava.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushJScript.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushPhp.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushPython.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushRuby.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushSql.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushVb.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushXml.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;/static/js/syntaxhighlighter/shBrushPerl.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script language=&#39;javascript&#39;&gt;
+  SyntaxHighlighter.all();
+&lt;/script&gt;</pre></div>
+<p>其中，src里面是文件的目录，把从官网上下载的对应的js文件和css文件放到对应的目录即可。其实也可以直接引用官网的js文件，比如这样（以下代码来自我参考的网址，去掉了一些不需要的代码）</p>
+<div class="highlight"><pre class="chroma">&lt;link href=&#39;http://alexgorbatchev.com/pub/sh/current/styles/shCore.css&#39; rel=&#39;stylesheet&#39; type=&#39;text/css&#39;/&gt;
+&lt;link href=&#39;http://alexgorbatchev.com/pub/sh/current/styles/shThemeDefault.css&#39; rel=&#39;stylesheet&#39; type=&#39;text/css&#39;/&gt;
+&lt;script src=&#39;http://alexgorbatchev.com/pub/sh/current/scripts/shCore.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script src=&#39;http://alexgorbatchev.com/pub/sh/current/scripts/shBrushCpp.js&#39; type=&#39;text/javascript&#39;&gt;&lt;/script&gt;
+&lt;script language=&#39;javascript&#39;&gt;
+    SyntaxHighlighter.all();
+&lt;/script&gt;</pre></div>
+<p>不过，这样会导致没有联网的时候，自己写博客预览的时候看不到代码的高亮效果。</p>
+
+<p>之后，写代码的时候，不要使用markdown的语法，直接用pre抱起来就好了。就比如这样</p>
+<div class="highlight"><pre class="chroma">&lt;pre class=&#34;brush: cpp&#34;&gt;
+&lt;/pre&gt;</pre></div>
+<p>效果就和以上一样了。这个应该比pygments更好看吧。不过目前加载速度比较慢，以后再改吧</p>
+
+    </div>
+</div>
+</div>
+
+<h2 style="color: #777">评论</h2>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codevim" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

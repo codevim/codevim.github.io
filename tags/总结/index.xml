@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>总结 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E6%80%BB%E7%BB%93/</link>
+    <description>Recent content in 总结 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Mon, 26 Dec 2016 15:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E6%80%BB%E7%BB%93/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>2017之前</title>
+      <link>https://codevim.github.io/post/2016/2016-12-26-before-2017/</link>
+      <pubDate>Mon, 26 Dec 2016 15:00:00 +0800</pubDate>
+      
+      <guid>https://codevim.github.io/post/2016/2016-12-26-before-2017/</guid>
+      <description>2016年，干了几件事，出去实习了，找到工作了，以及毕设相关。 先说实习，第一次是在腾讯。虽然我进去的之后的岗位也是研发实习生，但这个部门其实</description>
+    </item>
+    
+    <item>
+      <title>忙&amp;amp;累</title>
+      <link>https://codevim.github.io/post/2012/2012-11-25-busy-and-tired/</link>
+      <pubDate>Sun, 25 Nov 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-11-25-busy-and-tired/</guid>
+      <description>上一篇博客已经说了，这个学有, &amp;ldquo;编程生涯&amp;rdquo;许多的大作业，代码量不小。到现在过去了一个月，代码量是蹭蹭的往上涨。一个科</description>
+    </item>
+    
+    <item>
+      <title>新学期的第一个月</title>
+      <link>https://codevim.github.io/post/2012/2012-10-19-first-month-of-new-term/</link>
+      <pubDate>Fri, 19 Oct 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-10-19-first-month-of-new-term/</guid>
+      <description>已经过了午夜，算是19号了。算来，从上个月10好开学，也有一个多月了。正好博客也一个月没更新了，正好写一篇。 这个学期，单从课程的多少来看，应</description>
+    </item>
+    
+    <item>
+      <title>浮躁的暑假浮躁的我</title>
+      <link>https://codevim.github.io/post/2012/2012-08-16-fickle-summer-vacation-fickle-me/</link>
+      <pubDate>Thu, 16 Aug 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-08-16-fickle-summer-vacation-fickle-me/</guid>
+      <description>没有几天，暑假就结束了。从6月26日正式放假以来，感觉自己在放假之前画的大饼完全没有实现，可以说，整个暑假是一事无成。个人感觉都是浮躁惹的祸</description>
+    </item>
+    
+  </channel>
+</rss>

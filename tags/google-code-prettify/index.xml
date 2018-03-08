@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Google Code Prettify on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/google-code-prettify/</link>
+    <description>Recent content in Google Code Prettify on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Wed, 27 Feb 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/google-code-prettify/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Jekyll中使用google-code-prettify高亮代码</title>
+      <link>https://codevim.github.io/post/2013/2013-02-27-highlight-code-with-google-code-prettify/</link>
+      <pubDate>Wed, 27 Feb 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-02-27-highlight-code-with-google-code-prettify/</guid>
+      <description>这个博客，到现在换了好几个代码高亮的工具，之前的SyntaxHIghlighter虽然漂亮，无奈加载太慢，只能舍弃了。现在用的这个是goog</description>
+    </item>
+    
+  </channel>
+</rss>

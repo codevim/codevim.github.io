@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>反思 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E5%8F%8D%E6%80%9D/</link>
+    <description>Recent content in 反思 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Thu, 16 Aug 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E5%8F%8D%E6%80%9D/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>浮躁的暑假浮躁的我</title>
+      <link>https://codevim.github.io/post/2012/2012-08-16-fickle-summer-vacation-fickle-me/</link>
+      <pubDate>Thu, 16 Aug 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-08-16-fickle-summer-vacation-fickle-me/</guid>
+      <description>没有几天，暑假就结束了。从6月26日正式放假以来，感觉自己在放假之前画的大饼完全没有实现，可以说，整个暑假是一事无成。个人感觉都是浮躁惹的祸</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Jquery on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/jquery/</link>
+    <description>Recent content in Jquery on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sat, 09 Mar 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/jquery/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Javascript遍历DOM树</title>
+      <link>https://codevim.github.io/post/2013/2013-03-09-traversing-dom-tree-with-javascript/</link>
+      <pubDate>Sat, 09 Mar 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-03-09-traversing-dom-tree-with-javascript/</guid>
+      <description>这个博客是利用Jekyll在github pages上搭建的，显示在首页的文章，如果用{{ post.content | truncate: 200 }}，原有的格式不能完全保持，且有时在最后会</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Python on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/python/</link>
+    <description>Recent content in Python on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sun, 24 May 2015 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/python/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>写一个Web框架</title>
+      <link>https://codevim.github.io/post/2015/2015-05-24-writing-a-web-framwork/</link>
+      <pubDate>Sun, 24 May 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2015/2015-05-24-writing-a-web-framwork/</guid>
+      <description>在知乎上偶然看到了廖雪峰老师的网站上的Python教程，Python实战，目的是从头开始写一个博客。这个从头开始是，自己造轮子，包括ORM、</description>
+    </item>
+    
+    <item>
+      <title>尝试MongoEngine</title>
+      <link>https://codevim.github.io/post/2013/2013-08-10-a-bit-about-mongoengine/</link>
+      <pubDate>Sat, 10 Aug 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-08-10-a-bit-about-mongoengine/</guid>
+      <description>MongoEngine之于MongoDB来说，就类似于SQLAlchemy之于关系型数据库，是ODM。许多人对于MongoDB之类的文档型数</description>
+    </item>
+    
+    <item>
+      <title>web.py中自定义jinja2模块</title>
+      <link>https://codevim.github.io/post/2013/2013-03-03-custom-jinja2-module-in-webpy/</link>
+      <pubDate>Sun, 03 Mar 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-03-03-custom-jinja2-module-in-webpy/</guid>
+      <description>web.py是一个轻量级的Python web开发框架，不过自带的模板自己很不习惯，就换成了jinja2。web.py已经封装了jinja2的</description>
+    </item>
+    
+    <item>
+      <title>用Tornado连接新浪微博</title>
+      <link>https://codevim.github.io/post/2012/2012-09-13-connect-sina-weibo-with-tornado/</link>
+      <pubDate>Thu, 13 Sep 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-09-13-connect-sina-weibo-with-tornado/</guid>
+      <description>前几天心血来潮，稍稍看了一下Tornado框架，感觉这个框架和web.py很像（因为本来Tornado就是在web.py的基础上修改而来的）</description>
+    </item>
+    
+    <item>
+      <title>Python的逻辑运算</title>
+      <link>https://codevim.github.io/post/2012/2012-06-20-logic-operation-in-python/</link>
+      <pubDate>Wed, 20 Jun 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-06-20-logic-operation-in-python/</guid>
+      <description>Python的逻辑运算(and，or，not)与C/C++、Java等语言不太一样。这些语言的逻辑运算返回的值都是bool值，而Python</description>
+    </item>
+    
+  </channel>
+</rss>

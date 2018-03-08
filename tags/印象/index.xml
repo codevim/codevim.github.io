@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>印象 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E5%8D%B0%E8%B1%A1/</link>
+    <description>Recent content in 印象 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Fri, 31 Aug 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E5%8D%B0%E8%B1%A1/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>香港游小记三（完）</title>
+      <link>https://codevim.github.io/post/2012/2012-08-31-records-of-tour-to-hong-kong-3rd-completed/</link>
+      <pubDate>Fri, 31 Aug 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-08-31-records-of-tour-to-hong-kong-3rd-completed/</guid>
+      <description>回到了北京，香港之旅正式结束了。这一趟，身在香港的时间，是四天。前两天的情况我已经在前两篇博客中说过了，这篇就主要说说后两天的活动，还有自己</description>
+    </item>
+    
+  </channel>
+</rss>

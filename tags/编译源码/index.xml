@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>编译源码 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E7%BC%96%E8%AF%91%E6%BA%90%E7%A0%81/</link>
+    <description>Recent content in 编译源码 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sat, 14 Jul 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E7%BC%96%E8%AF%91%E6%BA%90%E7%A0%81/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>编译Linux内核</title>
+      <link>https://codevim.github.io/post/2012/2012-07-14-compiling-linux-kernel/</link>
+      <pubDate>Sat, 14 Jul 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-07-14-compiling-linux-kernel/</guid>
+      <description>这几天实验室交给任务，编译linux内核。然后就开始做了。 师兄给了两篇参考文章，这篇和这篇。第一篇比较简略，说了总体的过程，而第二篇比较而言</description>
+    </item>
+    
+  </channel>
+</rss>

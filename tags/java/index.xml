@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/java/</link>
+    <description>Recent content in Java on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sun, 20 Aug 2017 15:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/java/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Synchronized的内存屏障</title>
+      <link>https://codevim.github.io/post/2017/2017-08-20-memory-barrier-in-synchronized/</link>
+      <pubDate>Sun, 20 Aug 2017 15:00:00 +0800</pubDate>
+      
+      <guid>https://codevim.github.io/post/2017/2017-08-20-memory-barrier-in-synchronized/</guid>
+      <description>问题 在V2EX上看到这样一个问题，具体来说，就是下面这份代码，注释和不注释，为什么运行会有不同 public class MyRun implements Runnable { private boolean stop; MyRun(boolean status) { this.stop = status; } @Override public void run() { while(!stop) {</description>
+    </item>
+    
+    <item>
+      <title>JDK源码阅读之String</title>
+      <link>https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/</link>
+      <pubDate>Sun, 09 Jul 2017 14:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/</guid>
+      <description>这几天看了看Java的String的实现。Java中的所有的String字面量都是String类的实例。 文件注释中写到了，字面量生命Stri</description>
+    </item>
+    
+    <item>
+      <title>利用注解实现依赖注入</title>
+      <link>https://codevim.github.io/post/2016/2016-04-12-implement-dependency-injection-by-annotation/</link>
+      <pubDate>Tue, 12 Apr 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2016/2016-04-12-implement-dependency-injection-by-annotation/</guid>
+      <description>准备 依赖注入是啥？ 提到依赖注入（Denpendency Injection，DI），得先讲控制反转（Inversion of Control，IoC</description>
+    </item>
+    
+  </channel>
+</rss>

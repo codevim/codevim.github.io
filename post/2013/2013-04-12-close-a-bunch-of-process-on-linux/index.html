@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>Linux下关闭多个进程 | 天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-single">
+    <div class="post">    
+    <h1 class="post-title">Linux下关闭多个进程</h1>
+    <div class="post-meta">
+    <span class="post-date">2013.4.12</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/linux">Linux</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/shell">shell</a>
+        </span>
+        
+    
+</div>
+    <div class="post-content">
+        <p>很多时候，需要同时关闭一系列的有着相同的关键字的进程，比如说，开着十多个网页的chrome死掉了这种情况。。</p>
+
+<p>在Linux下面，敲几个命令就OK了，以下每行都可以，有些区别</p>
+<div class="highlight"><pre class="chroma">ps -e | grep chorme | cut -c 1-5 | xargs kill -9
+ps -e | awk &#39;$4==&#34;chrome&#34; {print $1}&#39; | xargs kill -9</pre></div>
+<p><code>ps -e</code>的输出如下</p>
+<div class="highlight"><pre class="chroma">12040 ?        00:00:00 kworker/1:1
+12041 ?        00:00:00 kworker/0:0
+12052 ?        00:00:09 chrome
+12119 ?        00:00:00 kworker/3:0</pre></div>
+<p>这个命令输出了当前的所有进程信息，最前面的就是进程的pid。第四列是进程的名称</p>
+
+<p><code>grep chrome</code>就是查找含有<code>chrome</code>的行并输出。<code>cut -c 1-5</code>意思是对输入的每一行取第1到5个字符(恰好是进程的pid)输出。两个命令合起来，就是输出进程名含有<code>chrome</code>的进程的pid。</p>
+
+<p><code>awk '$4==&quot;chrome&quot; {print $1}'</code>做了同样的事，不过这个命令输出的是进程名恰好是<code>chrome</code>的进程的pid，而不仅仅是包含。</p>
+
+<p><code>xargs kill -9</code>这个命令，输入以换行或者空白分割之后，作为参数执行一遍或者多遍后面跟随的命令</p>
+
+<p>最后感叹一下，shell很强大！</p>
+
+    </div>
+</div>
+</div>
+
+<h2 style="color: #777">评论</h2>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codevim" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

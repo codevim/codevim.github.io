@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>web.py中自定义jinja2模块 | 天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-single">
+    <div class="post">    
+    <h1 class="post-title">web.py中自定义jinja2模块</h1>
+    <div class="post-meta">
+    <span class="post-date">2013.3.3</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/python">Python</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jinja2">jinja2</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web%E5%BC%80%E5%8F%91">web开发</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web.py">web.py</a>
+        </span>
+        
+    
+</div>
+    <div class="post-content">
+        <p>web.py是一个轻量级的Python web开发框架，不过自带的模板自己很不习惯，就换成了jinja2。web.py已经封装了jinja2的接口，很简单</p>
+<div class="highlight"><pre class="chroma">from web.contrib.template import render_jinja
+render = render_jinja(&#39;templates&#39;, encoding=&#39;utf-8&#39;)</pre></div>
+<p>之后就和自带模板一样使用了。web.py中使用jinja2的源代码如下</p>
+<div class="highlight"><pre class="chroma">class render_jinja:
+    &#34;&#34;&#34;Rendering interface to Jinja2 Templates
+
+    Example:
+
+        render= render_jinja(&#39;templates&#39;)
+        render.hello(name=&#39;jinja2&#39;)
+    &#34;&#34;&#34;
+    def __init__(self, *a, **kwargs):
+        extensions = kwargs.pop(&#39;extensions&#39;, [])
+        globals = kwargs.pop(&#39;globals&#39;, {})
+
+        from jinja2 import Environment,FileSystemLoader
+        self._lookup = Environment(loader=FileSystemLoader(*a, **kwargs), extensions=extensions)
+        self._lookup.globals.update(globals)
+
+    def __getattr__(self, name):
+        # Assuming all templates end with .html
+        path = name + &#39;.html&#39;
+        t = self._lookup.get_template(path)
+        return t.render</pre></div>
+<p>在<code>__getattr__</code>函数中，<code>path = name + '.html'</code>使得只能访问同级目录下的模板。同时，还不方便使用自定义函数。在其基础之上，稍作修改即可，如下</p>
+<div class="highlight"><pre class="chroma">class RenderJinja2:
+
+    postfix = (&#39;.html&#39;, &#39;&#39;, &#39;htm&#39;, &#39;tpl&#39;)
+
+    def __init__(self, *a, **kwargs):
+        extensions = kwargs.pop(&#39;extensions&#39;, [])
+        globals = kwargs.pop(&#39;globals&#39;, {})
+        registers = kwargs.pop(&#39;registers&#39;, {})
+
+        self._lookup = Environment(loader=FileSystemLoader(*a, **kwargs), extensions=extensions)
+        self._lookup.globals.update(globals)
+        self._lookup.globals.update(registers)
+
+    def render(self, path, **kwargs):
+        for fix in self.postfix:
+            realpath = path + fix
+            try:
+                t = self._lookup.get_template(realpath)
+                return t.render(**kwargs)
+            except:
+                pass
+        raise TemplateNotFound
+
+    def __getattr__(self, name):
+        path = name + &#39;.html&#39;
+        t = self._lookup.get_template(path)
+        return t.render</pre></div>
+<p>现在，自定义的函数、变量可以通过register这个字典传入，渲染时也有两种方式，</p>
+<div class="highlight"><pre class="chroma"># 通过register传入自定义的函数或者变量，这里为了方便，使用了locals()
+render = RenderJinja2(&#39;path/to/templats&#39;, encoding=&#39;utf-8&#39;, registers=locals())
+
+# 渲染时
+render.render(&#39;path&#39;, **kwargs) # 新加的render
+render.post(**kwargs) # 原先的方式，通过 __getattr__</pre></div>
+    </div>
+</div>
+</div>
+
+<h2 style="color: #777">评论</h2>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codevim" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

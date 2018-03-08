@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>String on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/string/</link>
+    <description>Recent content in String on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sun, 09 Jul 2017 14:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/string/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>JDK源码阅读之String</title>
+      <link>https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/</link>
+      <pubDate>Sun, 09 Jul 2017 14:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/</guid>
+      <description>这几天看了看Java的String的实现。Java中的所有的String字面量都是String类的实例。 文件注释中写到了，字面量生命Stri</description>
+    </item>
+    
+  </channel>
+</rss>

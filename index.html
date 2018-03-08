@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+	<meta name="generator" content="Hugo 0.37" />
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-index">
+    <div class="posts">
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2017/2017-08-20-memory-barrier-in-synchronized/">Synchronized的内存屏障</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2017.8.20</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/java">Java</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E5%B9%B6%E5%8F%91">并发</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<h2 id="问题">问题</h2>
+
+<p>在V2EX上看到这样<a href="https://www.v2ex.com/t/384263">一个问题</a>，具体来说，就是下面这份代码，注释和不注释，为什么运行会有不同</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyRun</span> <span class="kd">implements</span> <span class="n">Runnable</span> <span class="o">{</span>
+
+	<span class="kd">private</span> <span class="kt">boolean</span> <span class="n">stop</span><span class="o">;</span>
+
+	<span class="n">MyRun</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">status</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">stop</span> <span class="o">=</span> <span class="n">status</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">while</span><span class="o">(!</span><span class="n">stop</span><span class="o">)</span> <span class="o">{</span>
+			<span class="c1">// System.out.println(&#34;running&#34;);
+</span><span class="c1"></span>		<span class="o">}</span>
+		<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;stop&#34;</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setStop</span><span class="o">(</span><span class="kt">boolean</span> <span class="n">stop</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">stop</span> <span class="o">=</span> <span class="n">stop</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 测试代码
+</span><span class="c1"></span><span class="n">MyRun</span> <span class="n">myRun</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyRun</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+<span class="k">new</span> <span class="n">Thread</span><span class="o">(</span><span class="n">myRun</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+<span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1000</span><span class="o">);</span> <span class="c1">// 等待线程执行
+</span><span class="c1"></span><span class="n">myRun</span><span class="o">.</span><span class="na">setStop</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span></code></pre></div>
+<p>这个代码目的就是通过主线程修改变量，控制子线程的运行。
+为了这个目的，很显然<code>stop</code>需要添加<code>volitale</code>关键字，表明<code>stop</code>是多线程可见的。
+那么，子线程在读取<code>stop</code>的时候，会从先把主内存的变量同步到自己的工作内存，然后再使用，
+因而可以拿到最新的<code>stop</code>的值。</p>
+
+<p>抛开<code>volatile</code>不谈，单独这份代码，注释和不注释下<a href="https://www.v2ex.com/t/384263">一个问题</a>，运行结果也有很大差异。</p>
+
+<ul>
+<li>注释的情况下，子线程没有得到<code>stop</code>的最新值，其工作内存中的<code>stop</code>一直是<code>false</code>，因此程序死循环。
+这和预期情况一致。</li>
+<li>不注释的情况下，程序会一直输出<code>running</code>，知道1秒后，输出<code>stop</code>。显然子线程获得到了<code>stop</code>的最新值。
+这里的我就不太理解了，为什么呢？</li>
+</ul>
+
+<h2 id="syncronized"><code>syncronized</code></h2>
+
+<p>最开始我以为是IO引起的用户态内核态切换，会导致从主存中同步，不过查了一圈资料，这个猜想是错误的。</p>
+
+<p><code>println</code>函数在jdk里的实现是这样的</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">println</span><span class="o">(</span><span class="n">String</span> <span class="n">x</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">synchronized</span> <span class="o">(</span><span class="k">this</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">print</span><span class="o">(</span><span class="n">x</span><span class="o">);</span>
+        <span class="n">newLine</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+<p>里面有个<code>synchronized</code>，估计就是和这个有关了。</p>
+
+<p>手头有本《深入理解Java虚拟机》（简称书），里边关于Java的内存模型，
+有这样的说法
+&gt; 同步块的可见性是由“对一个变量执行unlock操作之前，必须先把此变量同不会主内存中（执行store、wirte操作）”这条规则获得的。</p>
+
+<p>但是这个说法和这里用法不一样，因为书中说法，意思是退出同步块之前，要把<code>synchronized</code>的对象同步会主内存。
+而本问题中，同步块锁住的对象<code>this</code>，是指<code>System.out</code>这个对象，并不是<code>myRun</code>。</p>
+
+<p>在<a href="https://www.cs.umd.edu/~pugh/java/memoryModel/jsr-133-faq.html#synchronization">JSR 133 FAQ</a>中，有如下说法</p>
+
+<blockquote>
+<p>Before we can enter a synchronized block, we acquire the monitor, which has the effect of invalidating the local processor cache so that variables will be reloaded from main memory. We will then be able to see all of the writes made visible by the previous release.</p>
+</blockquote>
+
+<p>这说明<code>synchronzed</code>可以是使本地CPU缓存失效，从而从主内存中读取最新的变量值。
+但是后面的有一个*Important Note*，表明只有释放和获取的是同一把锁，才能保证<strong>happen before</strong>关系，
+又让我对这段胡的理解产生了疑问。
+在stackoverflow上，有一个关于这段话的<a href="https://stackoverflow.com/questions/1850270/memory-effects-of-synchronization-in-java">提问</a>，但是并没有让我更明白。</p>
+
+<p>之后又去看Java语言规范中关于内存模型的部分。
+在<a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.1">Java语言规范17.1节</a>，关于<code>synchronized</code>块，有如下说明</p>
+
+<blockquote>
+<p>attempts to perform a lock action on that object&rsquo;s monitor and does not proceed further until the lock action has successfully completed</p>
+</blockquote>
+
+<p>这里的一个重点是<strong>lock action</strong>，这章中只说明lock的意思是locking a monitor，并没有具体的解释。
+书中写到Java内存模型有8个操作，其中一个就是<code>lock</code>，但是Java语言规范中并没有相关说明。
+最后在<a href="https://docs.oracle.com/javase/specs/jvms/se6/html/Threads.doc.html">Java6的虚拟机规范第8章</a>中，才找到对其的说明，并有一个对于本问题的重要的规则</p>
+
+<blockquote>
+<p>Let T be any thread, let V be any variable, and let L be any lock. There are certain constraints on the operations performed by T with respect to V and L:<br />
+Between a lock operation by T on L and a subsequent use or store operation by T on a variable V, an assign or load operation on V must intervene; moreover, if it is a load operation, then the read operation corresponding to that load must follow the lock operation, as seen by main memory. (Less formally: a lock operation behaves as if it flushes all variables from the thread&rsquo;s working memory, after which the thread must either assign them itself or load copies anew from main memory.)</p>
+</blockquote>
+
+<p>这个规则说明，<code>synchronized</code>可以保证其工作内存中的变量都是最新版本。对于本问题，对<code>System.out</code>的锁，
+更新了工作内存中的值，从而退出循环。</p>
+
+<p>不过，在Java7和Java8的虚拟机规范中，这一章被移除了，并将相应的内容放到了Java语言规范中，
+也就是上文所引用的<a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-17.html#jls-17.1">第17章</a>中。但是我并没有在其中找到与这个规则具有相同意义的规则。
+不知道哪里漏了。</p>
+
+<h2 id="变体">变体</h2>
+
+<p>把问题中的<code>run</code>方法改一下，变成</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">while</span><span class="o">(!</span><span class="n">stop</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">1</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;stop&#34;</span><span class="o">);</span>
+<span class="o">}</span></code></pre></div>
+<p>实际上也是会最后输出<code>stop</code>的。但是Java语言规范中明确表示，
+&gt; It is important to note that neither Thread.sleep nor Thread.yield have any synchronization semantics. In particular, the compiler does not have to flush writes cached in registers out to shared memory before a call to Thread.sleep or Thread.yield, nor does the compiler have to reload values cached in registers after a call to Thread.sleep or Thread.yield.</p>
+
+<p>也就是说<code>Thread.sleep</code>是不需要刷新工作内存的。
+但是这里仍然打印了<code>stop</code>，说明在某种情况下，线程冲主内存同步了变量。
+由于这并不是Java的规范，所以这是和JVM的具体实现相关，因此并不能依赖于这一点。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>Java的内存模型之前看过，但是并不是非常清楚。这次前后查了好多，也有了更多的理解。
+并且还有个问题并没有搞清楚，Java8的规范里，哪条规则能够明确的推导出Java6关于lock的规则。
+这个就慢慢再看吧</p>
+
+<h2 id="updated">Updated</h2>
+
+<p>原贴下有贴出了<a href="http://www.cnblogs.com/cookiezhi/p/5774583.html">一个链接</a>，感觉说得刚靠谱。JVM虚拟机做了优化，会尽可能的保障工作内存与主内存的同步。
+这样就解释了<code>synchronized</code>和<code>sleep</code>时，线程能够获取到最新变量。</p>
+
+<p>想想还是太naive了，还是要多学多看啊</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/">JDK源码阅读之String</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2017.7.9</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/java">Java</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jdk">JDK</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E6%BA%90%E7%A0%81">源码</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/string">String</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<p>这几天看了看Java的<code>String</code>的实现。Java中的所有的<code>String</code>字面量都是<code>String</code>类的实例。
+文件注释中写到了，字面量生命<code>String s = &quot;abc&quot;</code>和</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kt">char</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">char</span><span class="o">[]{</span><span class="sc">&#39;a&#39;</span><span class="o">,</span> <span class="sc">&#39;b&#39;</span><span class="o">,</span> <span class="sc">&#39;c&#39;</span><span class="o">};</span>
+<span class="n">String</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">data</span><span class="o">)</span></code></pre></div>
+<p>效果是一样的。这应该是JVM来实现的。</p>
+
+<h2 id="接口">接口</h2>
+
+<p><code>String</code>实现了三个接口，分别是<code>Serializable</code>，<code>Comparable&lt;String&gt;</code>和<code>CharSequence</code>。
+<code>Serializable</code>用于序列化，<code>Comparable&lt;String&gt;</code>用于比较，
+<code>CharSequence</code>则是<code>String</code>的一个更通用的抽象。</p>
+
+<h2 id="属性">属性</h2>
+
+<p><code>String</code>最重要的属性是<code>private final char value[]</code>，<code>value</code>中存放着<code>String</code>的实际内容。
+此外，Java的<code>char</code>的长度是16bit，两个字节。
+另外一个属性是<code>private int hash</code>，是<code>String</code>得哈希值，默认为0。<code>hash</code>在调用<code>hashCode()</code>时计算，
+因此不是<code>final</code>。</p>
+
+<h2 id="构造方法">构造方法</h2>
+
+<p><code>String</code>的构造方法分为几类
+* 无参构造方法，得到的就是空的字符串
+* 参数是<code>String</code>的，直接对<code>value</code>和<code>hash</code>赋值
+* <code>char[]</code>相关的，这类方法进行越界检查，由于<code>String</code>是不可变的，还会复制数组
+* <code>int[]</code>相关的，这里的参数是Unicode的codePoint，因为Unicode是4字节的，所以使用了<code>int</code>。
+  对于基本平面（BMP）的字符，只需要<code>char</code>即可。对于辅助平面的字符，一个codePoint，需要两个<code>char</code>才能存下。
+* <code>byte[]</code>相关的，所有从<code>byte[]</code>转为<code>String</code>的，都需要指明编码格式。
+  曾经有过不需要指明编码格式的方法，但是现在已经<code>Deprecated</code>了，因为有bug。
+* <code>StringBuilder</code>和<code>StringBuffer</code>，具体实现上都是复制数组，<code>StringBuffer</code>加了锁
+* <code>String(char[] value, boolean share)</code>，这是一个特殊的构造方法，这个方法可访问性是包内可见。
+  为了性能上的考量，实现上不做数组复制，只是简单的赋值。调用的时候，<code>share</code>一定是<code>true</code>。</p>
+
+<h2 id="方法">方法</h2>
+
+<p>所有方法方法中，涉及到可能产生新的字符串的，都会先检查参数，是否可以直接返回自身。</p>
+
+<ul>
+<li><code>length</code>直接返回<code>value.length</code></li>
+<li><code>isEmpty</code>判断<code>value.length == 0</code></li>
+<li><code>hasCode</code>返回<code>hash</code>，如果没有计算过，用times31算法计算，并保存结果</li>
+<li><code>equals</code>，不比较<code>hashCode</code>，直接按序比较字符</li>
+<li>其他比较相关的方法，
+
+<ul>
+<li>定义了内部静态类<code>CaseInsensitiveCompartator</code>，用于处理大小写不敏感的比较</li>
+<li>基本上都是从前向后遍历</li>
+<li><code>compareTo</code>方法是按照Unicode字典序比较的，有不同则返回不同的字符的差，否则返回长度的差</li>
+</ul></li>
+<li><code>indexOf(int ch, int fromIndex)</code>
+
+<ul>
+<li><code>indexOf(ch) == indexOf(ch, 0)</code></li>
+<li>先判断ch，如果是负值（非法值）或者BMP字符，从前到后扫一遍</li>
+<li>否则是辅助平面字符，从前到后扫，比较前导代理以及后尾代理</li>
+</ul></li>
+<li><code>indexOf(String s, int fromIndex)</code>
+
+<ul>
+<li>实现上，先找到第一个字符，然后比较余下字符。不断循环</li>
+<li>效率上比较低下，<a href="https://stackoverflow.com/questions/19543547/why-jdks-string-indexof-does-not-use-kmp">stackoverflow</a>有个讨论，我觉得还是有道理的</li>
+</ul></li>
+<li><code>contains</code>，判断<code>indexOf() &gt; -1</code></li>
+<li><code>matches</code>，调用<code>Pattern.matches</code></li>
+<li><code>split(String regex, int limit)</code>
+
+<ul>
+<li><code>limit</code>表示分割后的数组的长度，若0，表示不限制结果的个数。默认为0</li>
+<li>实现上，如果<code>regex</code>是简单的字符串</li>
+<li>单个字符，并且不是正则表达式的元字符</li>
+<li>两个字符，第一个是<code>'\\'</code>，并且第二个不是ascii字母和数字</li>
+<li>从前到后扫，调用<code>indexOf</code></li>
+<li>否则调用Pattern</li>
+<li>空的字符串会返回</li>
+<li>但是，<code>split</code>方法有个坑，就是最后一个分隔符后面如果没有其他字符，那么是没有最后一个空字符串的</li>
+<li><code>&quot;hello,,yes,&quot;.split(&quot;,&quot;) == [&quot;hello&quot;, &quot;&quot;, &quot;yes&quot;]</code></li>
+</ul></li>
+<li><code>join</code>，静态方法，调用<code>StringJoiner</code>
+
+<ul>
+<li><code>null</code>会按照<code>&quot;null&quot;</code>处理</li>
+</ul></li>
+<li><code>concat(str)</code>，不检查参数，如果为<code>null</code>会报异常，如果<code>str.length != 0</code>，开辟新的数组。
+
+<ul>
+<li>只调用一次数组复制，</li>
+</ul></li>
+<li><code>substring</code>，检查之后复制数组。之前某个版本好像是没有复制数组，导致了内存泄漏</li>
+<li><code>trim</code>，实现上是去除了前后的所有ascii码小于等于20的字符</li>
+<li><code>replace</code>
+
+<ul>
+<li>字符替换，如果相同或者未发现，直接返回，否则遍历</li>
+<li>字符串替换，调用<code>Pattern</code></li>
+</ul></li>
+<li>大小写转换相关方法的实现，考虑的东西比较多，实现比较复杂。涉及了<code>Locale</code>，未知名则使用系统默认的。
+不同的语种，大小写规则不太一样，调用了<code>ConditionalSpecialCasing</code>进行实际的转换</li>
+<li><code>toString</code>，返回自己</li>
+<li><code>toCharArray</code>，调用<code>System.arraycopy</code>产生新的数组</li>
+<li><code>valueOf</code>系列
+
+<ul>
+<li><code>char[]</code>，调用构造函数</li>
+<li><code>Object</code>，<code>&quot;nul&quot;</code>或者<code>toString()</code></li>
+<li>内置类型，直接调用响应的<code>toString()</code></li>
+</ul></li>
+<li><code>native intern()</code>，将自身添加到字符串池</li>
+</ul>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2016/2016-12-26-before-2017/">2017之前</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2016.12.26</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E6%80%BB%E7%BB%93">总结</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>2016年，干了几件事，出去实习了，找到工作了，以及毕设相关。</p>
+
+<p>先说实习，第一次是在腾讯。虽然我进去的之后的岗位也是研发实习生，但这个部门其实并不是一个做研发的部门，是做直播的，腾讯视频的一些的直播的技术支持部门，主要是体育赛事，还会有一些演唱会、新闻等等。由于不是研发部门，其实进去之后首先熟悉了演播室的直播设备，跟着值班了一段时间。除却这些直播技术，部门还负责直播的在线包装、场景设计，使用的广电行业的专用软件，Viz。我感觉Viz还是非常复杂，有各种插件用于实现各种功能，当这些插件无法实现所需要的功能时，Viz还提供脚本支持，可以编写一些复杂的动画、人机交互界面等等。这个脚本还是比较简单的，当时的leader说这个脚本其实就是VB差不多。Viz脚本其实想要招程序员的一个最重要的一点。不过由于我在腾讯的实习其实还是比较短，Viz脚本也没学多少。后来实习快结束的时候，又给我了一个开发一个内部使用的系统的任务。从2015年12月末开始，在腾讯实习了3个月多。由于不是研发部门，对研发的情况不是很了解，就我自己所在的部门，气氛是比较轻松的，也没有特别严格的作息要求。腾讯有专门的内部技术论坛，供工程师交流。</p>
+
+<p>从腾讯离职之后，由师兄内推，又去了微软实习。部门是微软小冰。进去以后，我的座位是由一个会议室改的，是一个单间，与mentor的办公位不在一起，而且做的项目基本上是一个人项目，所以和其他同事的交流不多。实习期间，做了两个项目，一个是内部数据的在线编辑管理的系统吧，另一个是爬虫。第一个项目，实质上是增删改查，不过需要先把原有的文本文件的数据倒进来。而且需要有个界面，我选了Vue做前台，这里其实就是自己的选择，没有过多的比较，而且在腾讯做的项目也是用了Vue，还没忘光。第二个爬虫是mentor自己从头写的，我要做的就是增添一些功能。通过ssh远程在服务器上写，原因是用了一些库，只能在Linux上运行。因为这，把vim又好好学了一下。在微软实习，还是很轻松，没有压力，任务完成就行，mentor人也好。之后由于要开始找工作了，而且也要做毕设，就离职了。</p>
+
+<p>大约8月初，各种内推就开始了，直到10月末签了三方，足足3个月。而且必须吐槽网易带了个好头，内推不免笔试，结果都成这个套路了。这段时间，除了吃饭睡觉，就是笔试面试和准备笔试面试。leetcode刷了绝大部分，没有像同学一样其他第二遍。还有就是各种基础吧，主要是笔试面试啥都问，数据库、网络、操作系统、jvm、Java的多线程、JDK的常用集合的实现各种各种，上到高并发设计，下到内存页表。经常投的Java岗，结果笔试还是一堆的c++、php。</p>
+
+<p>我也也参加了不少面试，给我感觉最好的是Google和AirBnb，两者风格完全不同。Google应该是面试人数比较少，面试前后都会有电话通知，然后我就收到可面试挂了的电话。。面试官是外国人，为了面试专门飞过来的，很有经验，题目就是算法题，白板写。AirBnb
+的面试官是中国人，但是面试要求说英语，一轮45分钟，大约15分钟的题目，剩下的30分钟写代码，是可运行的环境。这个是我最喜欢的方式。面试给我感觉不好的事华为和网易。华为是两面很奇怪，根本没有问一些有区分度的问题，结果就跪了。网易的面试过程还可以，但是安排比较乱，面试官和HR之间的信息沟通不畅，中间空等了好长时间。还有滴滴，虽然我没参加，但是今年的面试安排真的是一团shi。</p>
+
+<p>至于论文，目的就是毕业了。自己对做科研还是没有太大的兴趣，写代码做工程更适合我。答辩时间改到明年3月，希望一切顺利！</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2016/2016-09-24-rust-web-server/">用Rust写了一个简单的Web服务器</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2016.9.24</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/rust">Rust</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web%E6%9C%8D%E5%8A%A1%E5%99%A8">Web服务器</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<h2 id="rust">Rust</h2>
+
+<p>最近学了一阵Rust，这个语言的目的是系统编程，卖点是无GC的内存安全。为了实现这一点，Rust引入了所有权、借用、生命周期的概念。可以在编译器检查出可能的内存问题，如野指针、局部变量指针等等。不过这也对写程序造成了一定的困扰，对于move、borrow等如果理解的不是很到位，那必然要和编译器做长期的斗争。</p>
+
+<h2 id="web服务器">Web服务器</h2>
+
+<h3 id="骨架">骨架</h3>
+
+<p>Web服务器，实际上就是对socket的数据流的处理，监听端口，并对每个新的连接，开启一个新的线程进行处理。代码的骨架基本上是</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">match</span><span class="w"> </span><span class="n">TcpListener</span>::<span class="n">bind</span><span class="p">(</span><span class="s">&#34;127.0.0.1&#34;</span><span class="p">,</span><span class="w"> </span><span class="mi">9999</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="n">listener</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">stream</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">listener</span><span class="p">.</span><span class="n">incoming</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="k">match</span><span class="w"> </span><span class="n">stream</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                    </span><span class="c1">// error, log, ignore
+</span><span class="c1"></span><span class="w">                </span><span class="p">},</span><span class="w">
+</span><span class="w">                </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                    </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">handle_client</span><span class="p">(</span><span class="n">s</span><span class="p">));</span><span class="w">
+</span><span class="w">                </span><span class="p">},</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">drop</span><span class="p">(</span><span class="n">listener</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">},</span><span class="w">
+</span><span class="w">    </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// error, log, ignore
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span></code></pre></div>
+<p>其中<code>thread::spawn(move || handle_client(s))</code>，开启新的线程，参数是一个闭包，<code>move</code>关键字表示将闭包所在环境的标量的所有权强行交给闭包。之后重点是<code>handle_client</code>中对于<code>TcpStream</code>的处理，也就是解析请求，并构造响应。读取请求。</p>
+
+<h3 id="解析请求">解析请求</h3>
+
+<p>一个HTTP的请求，格式是这样的</p>
+<div class="highlight"><pre class="chroma">METHOD URI VERSION
+Host: xxx
+other-header: xxx
+
+body</pre></div>
+<p>这个服务器目前只能处理GET和HEAD请求，并且只能处理静态文件，所有很多东西并没有做。比如querystring的解析、请求体的解析等等。各种header也只是解析，并没有真的使用。之后会慢慢完善，函数重点是</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">parse</span><span class="p">(</span><span class="n">stream</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">TcpStream</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">Self</span>::<span class="n">get_request</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">s</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from_utf8</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="c1">// parse request line and header
+</span><span class="c1"></span><span class="w">        </span><span class="p">},</span><span class="w">
+</span><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span></code></pre></div>
+<p>如果解析失败，返回一个<code>None</code>，这是<code>Request</code>结构的一个静态方法。解析成功则打印日志，并根据请求构造响应。</p>
+
+<h3 id="构造响应">构造响应</h3>
+
+<p>响应的的格式为</p>
+<div class="highlight"><pre class="chroma">VERSION CODE PHRASE
+header: xxx
+other-header: xxx
+
+body</pre></div>
+<p>由于只能处理静态请求，实际上这里就是读取文件并.对于<code>HEAD</code>请求，只计算长度，没有响应体部分。</p>
+
+<p>目前的相应的结构为</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Response</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">head</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">body</span>: <span class="nb">String</span>
+<span class="p">}</span></code></pre></div>
+<p>通过code、mime、content等拼接字符串，得到响应头部以及响应体。最后通过<code>TcpStream</code>发送出去。</p>
+
+<p>至此，这个web服务器就算是完成了。</p>
+
+<h2 id="最后">最后</h2>
+
+<p>Rust这个语言还是非常不熟，对于lifetime的理解也太行，所以通篇没有用到lifetime标记，遇到字符串都是用的String。另外，Rust目前并没有高性能的非阻塞IO以及异步IO，有一些库在做这方面的尝试。不过对这方面不熟，没有多做尝试。</p>
+
+<p>最后，项目的地址是<a href="https://github.com/iEverX/rock">https://github.com/iEverX/rock</a></p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2016/2016-04-12-implement-dependency-injection-by-annotation/">利用注解实现依赖注入</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2016.4.12</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/java">Java</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5">依赖注入</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E6%B3%A8%E8%A7%A3">注解</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<h2 id="准备">准备</h2>
+
+<h3 id="依赖注入是啥">依赖注入是啥？</h3>
+
+<p>提到依赖注入（Denpendency Injection，DI），得先讲控制反转（Inversion of Control，IoC）。控制反转是一种设计原则，目的是去除代码的去耦合。通常写程序，我们会在类中实例化所需的对象，比如说</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">class</span> <span class="nc">Car</span> <span class="o">{</span>
+    <span class="n">Tier</span> <span class="n">tier</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Tier</span><span class="o">(</span><span class="s">&#34;A&#34;</span><span class="o">);</span>
+<span class="o">}</span></code></pre></div>
+<p>这里，<code>Tier</code>就是<code>Car</code>的一个依赖。像这种代码会造成一个问题，那就是<code>Tier</code>和<code>Car</code>之间是耦合在一起的。假如<code>Tier</code>的实现变了，增加了新的构造函数，原来的无参构造函数不满足<code>Car</code>的需求，那么就还需要修改<code>Car</code>的代码。如果换个方式，把代码改成下面这样</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">class</span> <span class="nc">Car</span> <span class="o">{</span>
+    <span class="n">Tier</span> <span class="n">tier</span><span class="o">;</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setTier</span><span class="o">(</span><span class="n">Tier</span> <span class="n">tier</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">tier</span> <span class="o">=</span> <span class="n">tier</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+<p>那么就可以通过事先实例化一个<code>Tier</code>对象，通过<code>setTier</code>方法传给<code>Car</code>对象，<code>Car</code>的代码完全不需要修改。这就是控制反转，所谓反转，意思是依赖的控制被反转了。之前，依赖的生成有对象控制，现在依赖的生成由外层代码控制。上面的采用<code>set</code>方法的方式就称为依赖注入，还可以通过构造函数，或者通过接口实现。</p>
+
+<h3 id="注解">注解</h3>
+
+<p>注解（Annotation）是Java在1.5版本提供的特性，通过注解可以给JVM提供额外的信息。这些额外的信息，可以在运行时获取，从而改变代码的行为。</p>
+
+<h2 id="代码实现">代码实现</h2>
+
+<p>为了实现依赖注入，需要有以下几个东西</p>
+
+<ul>
+<li>标识一个属性通过外部注入的注解</li>
+<li>根据注解注入对象的代码</li>
+<li>一个保存组件的容器，以及生成的组件</li>
+</ul>
+
+<p>其中最后一点就是Spring中的<code>component-scan</code>功能，不过我不会实现，所以本文的最后一点是手工完成的。</p>
+
+<h3 id="注解-1">注解</h3>
+
+<p>代码很简单</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="nd">@Target</span><span class="o">(</span><span class="n">ElementType</span><span class="o">.</span><span class="na">FIELD</span><span class="o">)</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="n">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Documented</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="n">Inject</span> <span class="o">{</span>
+    <span class="n">String</span> <span class="nf">value</span><span class="o">()</span> <span class="k">default</span> <span class="s">&#34;&#34;</span><span class="o">;</span>
+<span class="o">}</span></code></pre></div>
+<p>这就OK了，一个注解就是这么简单。这里声明了一个名为<code>Inject</code>的注解，其关键字为<code>@interface</code>。与普通的接口不一样的地方是，不允许有属性，只能有方法，且方法不能有参数。此外，方法后可以跟一个<code>default</code>说明默认值。</p>
+
+<p>在注解之上的<code>Target</code>，<code>Retention</code>，<code>Documented</code>同样是注解，这些注解称为“元注解”，共有4个，除了以上三个还有一个<code>Inherited</code>。元注解用于对注解进行类型说明。</p>
+
+<ul>
+<li><code>Target</code>指明注解的使用范围，这里的<code>ElementType.FIELD</code>表明<code>Inject</code>可以注解属性，可选的值还包括<code>TYPE</code>，<code>PARAMETER</code>等</li>
+<li><code>Retention</code>指明注解的保留期限，<code>RUNTIME</code>表明在运行时可以获取注解信息。可选值还有<code>SOURCE</code>和<code>CLASS</code>，分别表示在源码和字节码中保留注解信息</li>
+<li><code>Documented</code>用来指明注解应该被文档化，指示javadoc之类的工具应该生成该注解的文档</li>
+<li><code>Inherited</code>指明注解可以被继承</li>
+</ul>
+
+<p><code>Inject</code>的定义很简单，其实可以更简单，那就是直接用Java自带的注解，比如<code>Resource</code>。因为注解本身不提供功能，注解功能的实现是由其他代码读取注解信息从而完成的。</p>
+
+<h3 id="使用注解">使用注解</h3>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Car</span> <span class="o">{</span>
+
+    <span class="nd">@Inject</span>
+    <span class="kd">private</span> <span class="n">Tier</span> <span class="n">tier</span><span class="o">;</span>
+    
+    <span class="nd">@Inject</span><span class="o">(</span><span class="s">&#34;james&#34;</span><span class="o">)</span>
+    <span class="kd">private</span> <span class="n">Driver</span> <span class="n">driver</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&#34;A car is running, driver is &#34;</span> <span class="o">+</span> <span class="n">driver</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">&#34;, and its tier&#39;s brand is &#34;</span> <span class="o">+</span> <span class="n">tier</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+<p><code>Tier</code>的注解没有参数，说明给的是默认值，<code>driver</code>的注解加了参数，但是没有指明是哪个参数，这种情况下，默认使用<code>value</code>，当有多个参数时，不允许省略value。</p>
+
+<h3 id="读取注解并注入">读取注解并注入</h3>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="kd">static</span> <span class="kt">void</span> <span class="nf">inject</span><span class="o">(</span><span class="n">Object</span> <span class="n">obj</span><span class="o">,</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">container</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Field</span><span class="o">[]</span> <span class="n">fields</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getDeclaredFields</span><span class="o">();</span>
+    <span class="k">for</span> <span class="o">(</span><span class="n">Field</span> <span class="n">field</span> <span class="o">:</span> <span class="n">fields</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">field</span><span class="o">.</span><span class="na">setAccessible</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+        <span class="n">Inject</span> <span class="n">inject</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="n">Inject</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">inject</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">inject</span><span class="o">.</span><span class="na">value</span><span class="o">();</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">name</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="k">if</span> <span class="o">(!</span><span class="n">container</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">name</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="n">RuntimeException</span><span class="o">(</span><span class="s">&#34;Object \&#34;&#34;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#34;\&#34; cannot be found in container.&#34;</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="n">field</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">obj</span><span class="o">,</span> <span class="n">container</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">name</span><span class="o">));</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">IllegalAccessException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="c1">// ignore
+</span><span class="c1"></span>            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span></code></pre></div>
+<p>这段代码通过反射获取一个类的所有字段，并获取字段上的Inject注解。如果有注解的情况下，依次根据注解的<code>value</code>以及属性的名字获取注入的对象名。并通过发射将对象赋给相应的属性。</p>
+
+<h3 id="实际运行">实际运行</h3>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;</span> <span class="n">container</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">Object</span><span class="o">&gt;();</span>
+<span class="n">container</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;james3&#34;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Driver</span><span class="o">());</span>
+<span class="n">container</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&#34;tier&#34;</span><span class="o">,</span> <span class="k">new</span> <span class="n">Tier</span><span class="o">());</span>
+
+<span class="n">Car</span> <span class="n">car</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Car</span><span class="o">();</span>
+<span class="n">inject</span><span class="o">(</span><span class="n">car</span><span class="o">,</span> <span class="n">container</span><span class="o">);</span>
+<span class="n">car</span><span class="o">.</span><span class="na">run</span><span class="o">();</span></code></pre></div>
+<p>在这里，通过<code>inject</code>方法将container中的对象根据需要注入到<code>car</code>中，无需<code>car</code>去管理对象的生成。注意到，这里的对象实例化都是有自己手动完成的。而且在实例化<code>car</code>时，依然自己手动调用了<code>inject</code>方法。所以这里简略的实现了一个依赖注入。为了自动实现以上想法，需要把<code>car</code>也放到<code>container</code>中。而<code>container</code>也应自动生成，可以通过扫描指定的包下的类来实现。个人感觉这里比较负责，不是很好写。具体可以参考Spring的实现。</p>
+
+<h2 id="总结">总结</h2>
+
+<p>使用注解可以极大的增强代码的灵活性，而且使用注解也并不复杂，通过几个简单地API就可以完全搞定，真的是so easy！</p>
+
+            </div>
+        </div>
+        
+    </div>
+    
+
+<ul class="pagination">
+    
+    <li>
+        <a href="/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li
+    class="disabled">
+    <a href="" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    class="active"><a href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="disabled"><span aria-hidden="true">&hellip;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/7/">7</a></li>
+    
+    
+    <li
+    >
+    <a href="/page/2/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li>
+        <a href="/page/7/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</div>
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

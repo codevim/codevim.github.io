@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Gitlab on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/gitlab/</link>
+    <description>Recent content in Gitlab on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Tue, 09 Apr 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/gitlab/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>安装GitLab</title>
+      <link>https://codevim.github.io/post/2013/2013-04-09-install-gitlab/</link>
+      <pubDate>Tue, 09 Apr 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-04-09-install-gitlab/</guid>
+      <description>在V2EX上面看了一个如何管理自己的代码的帖子，里面有个回答是使用gitlab，于是搜了一下。。可以这么说，gitlab是开源的github</description>
+    </item>
+    
+  </channel>
+</rss>

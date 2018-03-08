@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Syntaxhighlighter on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/syntaxhighlighter/</link>
+    <description>Recent content in Syntaxhighlighter on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Mon, 14 Jan 2013 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/syntaxhighlighter/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>在Jekyll中用SyntaxHighlighter高亮代码2</title>
+      <link>https://codevim.github.io/post/2013/2013-01-14-use-syntaxhighlighter-highlighting-code-in-jekyll-2nd/</link>
+      <pubDate>Mon, 14 Jan 2013 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2013/2013-01-14-use-syntaxhighlighter-highlighting-code-in-jekyll-2nd/</guid>
+      <description>之前有一篇博客是关于在Jekyll中利用SyntaxHighlighter去高亮代码的。不过那篇博客中的方法需要每次都加载所有的js文件，加</description>
+    </item>
+    
+    <item>
+      <title>在Jekyll中用SyntaxHighlighter高亮代码</title>
+      <link>https://codevim.github.io/post/2012/2012-11-30-use-syntaxhighlighter-highlighting-code-in-jekyll/</link>
+      <pubDate>Fri, 30 Nov 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-11-30-use-syntaxhighlighter-highlighting-code-in-jekyll/</guid>
+      <description>前几天把博客里的代码高亮改成[SyntaxHighligher][]了，感觉好了很多，看着也舒服，关键是复制代码的时候，行号连着代码在一行复</description>
+    </item>
+    
+  </channel>
+</rss>

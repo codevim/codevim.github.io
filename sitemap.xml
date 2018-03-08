@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://codevim.github.io/post/2017/2017-08-20-memory-barrier-in-synchronized/</loc>
+    <lastmod>2017-08-20T15:00:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2017/2017-07-09-jdk-source-code-string/</loc>
+    <lastmod>2017-07-09T14:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2016/2016-12-26-before-2017/</loc>
+    <lastmod>2016-12-26T15:00:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2016/2016-09-24-rust-web-server/</loc>
+    <lastmod>2016-09-24T15:00:00+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2016/2016-04-12-implement-dependency-injection-by-annotation/</loc>
+    <lastmod>2016-04-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2016/2016-01-20-an-introduction-to-parsing-text-in-haskell-with-parsec/</loc>
+    <lastmod>2016-01-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2015/2015-12-20-just-talk/</loc>
+    <lastmod>2015-12-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2015/2015-09-19-implement-haskell-map-function-in-cpp/</loc>
+    <lastmod>2015-09-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2015/2015-07-24-first-glance-of-react-and-redux/</loc>
+    <lastmod>2015-07-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2015/2015-05-24-writing-a-web-framwork/</loc>
+    <lastmod>2015-05-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2014/2014-08-29-solution-of-django-session-invalid-on-apache/</loc>
+    <lastmod>2014-08-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2014/2014-07-17-activemq-note/</loc>
+    <lastmod>2014-07-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-09-09-machine-learning-reading-note-1st/</loc>
+    <lastmod>2013-09-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-08-10-a-bit-about-mongoengine/</loc>
+    <lastmod>2013-08-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-04-12-close-a-bunch-of-process-on-linux/</loc>
+    <lastmod>2013-04-12T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-04-09-install-gitlab/</loc>
+    <lastmod>2013-04-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-03-20-a-sublime-text-plugin/</loc>
+    <lastmod>2013-03-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-03-09-traversing-dom-tree-with-javascript/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-03-03-custom-jinja2-module-in-webpy/</loc>
+    <lastmod>2013-03-03T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-02-27-highlight-code-with-google-code-prettify/</loc>
+    <lastmod>2013-02-27T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-01-14-use-syntaxhighlighter-highlighting-code-in-jekyll-2nd/</loc>
+    <lastmod>2013-01-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2013/2013-01-08-on-the-end-of-the-term/</loc>
+    <lastmod>2013-01-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-11-30-use-syntaxhighlighter-highlighting-code-in-jekyll/</loc>
+    <lastmod>2012-11-30T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-11-25-busy-and-tired/</loc>
+    <lastmod>2012-11-25T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-10-19-first-month-of-new-term/</loc>
+    <lastmod>2012-10-19T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-09-13-connect-sina-weibo-with-tornado/</loc>
+    <lastmod>2012-09-13T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-08-31-records-of-tour-to-hong-kong-3rd-completed/</loc>
+    <lastmod>2012-08-31T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-08-29-records-of-tour-to-hong-kong-2nd/</loc>
+    <lastmod>2012-08-29T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-08-28-records-of-tour-to-hong-kong-1st/</loc>
+    <lastmod>2012-08-28T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-08-16-fickle-summer-vacation-fickle-me/</loc>
+    <lastmod>2012-08-16T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-07-14-compiling-linux-kernel/</loc>
+    <lastmod>2012-07-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/2012/2012-06-20-logic-operation-in-python/</loc>
+    <lastmod>2012-06-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/activemq/</loc>
+    <lastmod>2014-07-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/apache/</loc>
+    <lastmod>2014-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/c--/</loc>
+    <lastmod>2015-09-19T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/django/</loc>
+    <lastmod>2014-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/dom/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/git/</loc>
+    <lastmod>2013-04-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/gitlab/</loc>
+    <lastmod>2013-04-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/google-code-prettify/</loc>
+    <lastmod>2013-02-27T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/haskell/</loc>
+    <lastmod>2016-01-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/java/</loc>
+    <lastmod>2017-08-20T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/javascript/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/jdk/</loc>
+    <lastmod>2017-07-09T14:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/jekyll/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/jinja2/</loc>
+    <lastmod>2013-03-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/jquery/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/linux/</loc>
+    <lastmod>2013-04-12T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/liquid/</loc>
+    <lastmod>2013-03-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/mongodb/</loc>
+    <lastmod>2013-08-10T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/parsec/</loc>
+    <lastmod>2016-01-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/post/</loc>
+    <lastmod>2017-08-20T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/python/</loc>
+    <lastmod>2015-05-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/react/</loc>
+    <lastmod>2015-07-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/redux/</loc>
+    <lastmod>2015-07-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/rust/</loc>
+    <lastmod>2016-09-24T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/shell/</loc>
+    <lastmod>2013-04-12T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/string/</loc>
+    <lastmod>2017-07-09T14:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/sublime-text/</loc>
+    <lastmod>2013-03-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/sublime-text-2/</loc>
+    <lastmod>2013-03-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/svn/</loc>
+    <lastmod>2014-08-29T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/syntaxhighlighter/</loc>
+    <lastmod>2013-01-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/</loc>
+    <lastmod>2014-07-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/tornado/</loc>
+    <lastmod>2012-09-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/web-framework/</loc>
+    <lastmod>2015-05-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/web.py/</loc>
+    <lastmod>2013-03-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/web%E5%BC%80%E5%8F%91/</loc>
+    <lastmod>2013-03-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/web%E6%9C%8D%E5%8A%A1%E5%99%A8/</loc>
+    <lastmod>2016-09-24T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E4%BB%A3%E7%A0%81%E4%B9%8B%E5%A4%96/</loc>
+    <lastmod>2015-12-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE/</loc>
+    <lastmod>2013-02-27T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/</loc>
+    <lastmod>2016-04-12T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%86%85%E6%A0%B8/</loc>
+    <lastmod>2012-07-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%89%8D%E7%AB%AF/</loc>
+    <lastmod>2015-07-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%8D%B0%E8%B1%A1/</loc>
+    <lastmod>2012-08-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%8F%8D%E6%80%9D/</loc>
+    <lastmod>2012-08-16T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%A4%A7%E5%AD%A6/</loc>
+    <lastmod>2013-01-08T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/</loc>
+    <lastmod>2017-08-20T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E5%B9%B6%E5%8F%91/</loc>
+    <lastmod>2017-08-20T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%80%BB%E7%BB%93/</loc>
+    <lastmod>2016-12-26T15:00:00+08:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%84%9F%E6%83%B3/</loc>
+    <lastmod>2013-01-08T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%8F%92%E4%BB%B6/</loc>
+    <lastmod>2013-03-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%96%B0%E5%AD%A6%E6%9C%9F/</loc>
+    <lastmod>2012-10-19T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A/</loc>
+    <lastmod>2012-09-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%97%85%E6%B8%B8/</loc>
+    <lastmod>2012-08-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%9A%91%E5%81%87/</loc>
+    <lastmod>2012-08-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/</loc>
+    <lastmod>2013-09-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%B3%A8%E8%A7%A3/</loc>
+    <lastmod>2016-04-12T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/</loc>
+    <lastmod>2014-07-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E6%BA%90%E7%A0%81/</loc>
+    <lastmod>2017-07-09T14:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2014-07-17T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E7%BC%96%E7%A8%8B%E7%94%9F%E6%B6%AF/</loc>
+    <lastmod>2013-01-08T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E7%BC%96%E8%AF%91%E6%BA%90%E7%A0%81/</loc>
+    <lastmod>2012-07-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E7%BF%BB%E8%AF%91/</loc>
+    <lastmod>2016-01-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E8%83%A1%E8%A8%80%E4%B9%B1%E8%AF%AD/</loc>
+    <lastmod>2015-12-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E8%AF%AD%E4%B9%89/</loc>
+    <lastmod>2012-06-20T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/</loc>
+    <lastmod>2013-09-09T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://codevim.github.io/tags/%E9%A6%99%E6%B8%AF/</loc>
+    <lastmod>2012-08-31T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

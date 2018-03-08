@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+	<meta name="generator" content="Hugo 0.37" />
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-index">
+    <div class="posts">
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2016/2016-01-20-an-introduction-to-parsing-text-in-haskell-with-parsec/">Haskell Parsec的简短介绍[译]</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2016.1.20</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/haskell">Haskell</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/parsec">Parsec</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E7%BF%BB%E8%AF%91">翻译</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<p>本文翻译自<a href="http://unbui.lt/#!/post/haskell-parsec-basics/">http://unbui.lt/#!/post/haskell-parsec-basics/</a>。这是我第一次翻译文章，这篇文章的英文看起来也不是很难，只是想尝试翻一下。由于第一次，许多地方的翻译并没有很通顺，整片文章读起来也是有些奇怪。此外代码中的注释没有翻译。以下是正文。</p>
+
+<blockquote>
+<p>Parsec的存在使得在Haskell中解析文本非常简单。这篇文章的目的在于给我自己和其他人一个从零开始介绍每个函数，并配有例子的指南和参考。</p>
+</blockquote>
+
+<p>首先，为什么要用Parsec而不是与之类似于正则表达式之类的东西来解析内容呢？其他语言中，把内容切分成数组，每次用正则表达式处理一部分，这种方式或者类似的其他方式，是一种非常常见的模式。在Haskell中，我们也可以采用这种方式，但是我已经看到了Parsec发出的光，我想把这种更好的方式介绍给你们。</p>
+
+<p>大多数的指南都是上来就是一个完整的例子，但是我会一个一个的介绍这些不同的函数，以后这篇文章也可以作为一个使用Parsec的备忘（对我自己和所有其他人都是如此）。我尽量保证每个例子是独立的，所以跳过某些部分并不会有问题，但是请注意最开始的基础代码。我也把所有的例子的代码放到了<a href="https://jsdw.github.io/unbuilt-posts/haskell-parsec-basics/examples.hs">这个文件</a>中，可以直接使用<code>:load</code>命令读到<code>ghci</code>中使用。</p>
+
+<h2 id="基础">基础</h2>
+
+<p>对于一个从头到尾的文本流，Parsec会尝试用一个规则或者规则的集合去匹配这个输入流。Parsec也是一个monadic，所以我们可以很容易把不同的规则通过<code>do</code>拼凑到一个序列中。一个一般的概念是，一个规则的工作方式是，每次从输入消费一个字符，并判断是否匹配。所以当把几个规则拼凑正一个序列时，每个规则会消费部分输入，直到没有输入、没有规则或者某个规则没有匹配（产生一个error）。</p>
+
+<p>我们首先从最基本的开始。我qualified引入了<code>Parsec</code>，所以可以直接使用<code>Parsec</code>函数（注：无需使用包名前缀）。同时引入了<code>Control.Applicative</code>，因此稍后可以使用applicative形式的代码。最后给<code>parseTest</code>起了一个简短的别名。</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- I import qualified so that it&#39;s clear which</span>
+<span class="c1">-- functions are from the parsec library:</span>
+<span class="kr">import</span> <span class="k">qualified</span> <span class="nn">Text.Parsec</span> <span class="k">as</span> <span class="n">Parsec</span>
+
+<span class="c1">-- I am the error message infix operator, used later:</span>
+<span class="kr">import</span> <span class="nn">Text.Parsec</span> <span class="p">((</span><span class="o">&lt;?&gt;</span><span class="p">))</span>
+
+<span class="c1">-- Imported so we can play with applicative things later.</span>
+<span class="c1">-- not qualified as mostly infix operators we&#39;ll be using.</span>
+<span class="kr">import</span> <span class="nn">Control.Applicative</span>
+
+<span class="c1">-- Get the Identity monad from here:</span>
+<span class="kr">import</span> <span class="nn">Control.Monad.Identity</span> <span class="p">(</span><span class="kt">Identity</span><span class="p">)</span>
+
+<span class="c1">-- alias Parsec.parse for more concise usage in my examples:</span>
+<span class="nf">parse</span> <span class="nf">rule</span> <span class="nf">text</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">parse</span> <span class="nf">rule</span> <span class="s">&#34;(source)&#34;</span> <span class="nf">text</span></code></pre></div>
+<p>以上就是基本的设定，并定义了一个简单的函数<code>parse</code>，这个函数只是忽略了<code>Parsec.parse</code>的第二个参数（实际上，这个参数是带解析内容的文件名，只用于Parsec显示错误信息是能提供一些其他的信息）。</p>
+
+<p>Parsec是有一系列的“积木”搭建起来的，每一块都是一个规则本身，或者是与其他规则一起组成的更复杂的规则。接下来我们看看这些基础的积木，以及它们是如何和上面的基本设定一起工作的。</p>
+
+<h3 id="parsec-char"><code>Parsec.char</code></h3>
+
+<p>这个函数返回一个规则，该规则根据输入的参数，去匹配输入文本中的当前字符。我们ghci中运行一下。</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">someText</span> <span class="ow">=</span> <span class="s">&#34;Hello Hello Hello World World World&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;H&#39;</span><span class="p">)</span> <span class="nf">someText</span>
+<span class="kt">Right</span> <span class="sc">&#39;H&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;e&#39;</span><span class="p">)</span> <span class="nf">someText</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;H&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;e&#34;</span></code></pre></div>
+<p><code>Parsec.char 'H'</code>返回了一个会匹配单个字符<code>'H'</code>的规则。如果我们用这个规则匹配一个以<code>H</code>开头的字符串，结果是好的。如果尝试任何不是<code>H</code>的字母，就会失败。结果的类型总是<code>Either ParsecError res</code>，如果规则成功，则得到<code>Right result</code>，失败则得到<code>Left error</code>。我们可以试试模式匹配，例子非常简单：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">main</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="kr">let</span> <span class="nf">result</span> <span class="ow">=</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;H&#39;</span><span class="p">)</span> <span class="s">&#34;Hello&#34;</span>
+    <span class="kr">case</span> <span class="nf">result</span> <span class="kr">of</span>
+        <span class="kt">Right</span> <span class="nf">v</span> <span class="ow">-&gt;</span> <span class="nf">putStrLn</span> <span class="s">&#34;success!&#34;</span>
+        <span class="kt">Left</span> <span class="nf">err</span> <span class="ow">-&gt;</span> <span class="nf">putStrLn</span> <span class="p">(</span><span class="s">&#34;whoops, error: &#34;</span><span class="o">++</span><span class="nf">show</span> <span class="nf">err</span><span class="p">)</span></code></pre></div>
+<h3 id="parsec-string"><code>Parsec.string</code></h3>
+
+<p>这个函数返回的是尝试匹配字符串的规则：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="s">&#34;hello world!&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="s">&#34;howdy&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;o&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;hello&#34;</span></code></pre></div>
+<p>Parser从输入中一个一个的消费字符，直到所有的字符都匹配或者某一个字符与预期不符。因为上面的两个尝试都是以<code>'h'</code>开头，错误信息是遇到了<code>unexpected 'o'</code>。当多个规则串联在一起时，字符的消费(consuming of characters)会变得非常重要。</p>
+
+<h3 id="parsec-oneof"><code>Parsec.oneOf</code></h3>
+
+<p>有时我们想要匹配多个字符，这时<code>Parsec.oneOf</code>就会非常方便。与<code>Parsec.char</code>相似，不过参数是<code>[Char]</code>类型：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">oneOf</span> <span class="s">&#34;abcde&#34;</span><span class="p">)</span> <span class="s">&#34;allo&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;a&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">oneOf</span> <span class="s">&#34;abcde&#34;</span><span class="p">)</span> <span class="s">&#34;chewy&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;c&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">oneOf</span> <span class="s">&#34;abcde&#34;</span><span class="p">)</span> <span class="s">&#34;gnaw&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;g&#34;</span></code></pre></div>
+<p>可以看到，parser会<em>消费</em><code>abcde</code>中的任意一个字符。这里我们可以用区间泪简化，比如可以使用<code>Parsec.oneOf ['a'..'z']</code>来匹配任意小写字母。</p>
+
+<p>Parsec提供了规则来完成上面的目的，比如，<code>Parsec.anyChar</code>会消费任何字符：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">anyChar</span> <span class="s">&#34;blahblah&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;b&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">anyChar</span> <span class="s">&#34;=-symbols...&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;=&#39;</span></code></pre></div>
+<p>规则<code>Parsec.letter</code>会消费任意字母，<code>Parsec.lower</code>会消费小写字母，<code>Parsec.digit</code>会消费数字，<code>Parsec.alphaNum</code>则是字母和数字。所有这些可以通过<code>Parsec.oneOf</code>来手动构建，不过这些提供了更好的错误提示信息（也可以在自己的规则里添加，我们稍后会看到）。</p>
+
+<h3 id="parsec-noneof"><code>Parsec.noneOf</code></h3>
+
+<p>与上一个相反，这个函数的参数是不允许匹配的字符串，它会匹配任何一个不在参数中的字符。当然也可以使用区间：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">noneOf</span> <span class="p">[</span><span class="sc">&#39;0&#39;</span><span class="o">..</span><span class="sc">&#39;9&#39;</span><span class="p">])</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;h&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">noneOf</span> <span class="p">[</span><span class="sc">&#39;0&#39;</span><span class="o">..</span><span class="sc">&#39;9&#39;</span><span class="p">])</span> <span class="s">&#34;100&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;1&#34;</span></code></pre></div>
+<h3 id="parsec-many-and-parsec-many1"><code>Parsec.many</code> and <code>Parsec.many1</code></h3>
+
+<p>我们有时候会希望不止解析一个字母，<code>Parsec.many</code>会不断尝试提供的规则，直到失败位为止。即使一次也没有成功，也不会返回失败，只是给出了一个空的结果。看看如何使用这个：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span><span class="p">))</span> <span class="s">&#34;hhhheeelllooo!&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hhhh&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;e&#39;</span><span class="p">))</span> <span class="s">&#34;hhhheeelllooo!&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="s">&#34;hhhheeelllooo!&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hhhheeelllooo&#34;</span></code></pre></div>
+<p>就像我们看到的，<code>Parsec.many</code>从来不会出错，它总是开心的匹配提供的规则0次，然后什么也不返回。它会尽量往前尝试，并且返回他匹配的任何东西。<code>Parsec.many1</code>类似，除了所给的规则至少匹配一次：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="s">&#34;hello!!&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="s">&#34;75 hello&#39;s!&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;7&#34;</span>
+<span class="nf">expecting</span> <span class="nf">letter</span></code></pre></div>
+<p>当想要匹配至少有一个字母或者数字的集合的时候，会非常有用。</p>
+
+<h3 id="parsec-count"><code>Parsec.count</code></h3>
+
+<p>当想要匹配某个东西特定的次数时，可以使用<code>Parsec.count</code>。参数是一个数字n和一个规则，期望匹配这个规则相应的次数（或者失败），返回匹配的结果。来个例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">count</span> <span class="mi">4</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="s">&#34;ahoythere&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;ahoy&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">count</span> <span class="mi">4</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="s">&#34;aho&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">4</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="nf">end</span> <span class="kr">of</span> <span class="nf">input</span>
+<span class="nf">expecting</span> <span class="nf">letter</span></code></pre></div>
+<h3 id="parsec-manytill"><code>Parsec.manyTill</code></h3>
+
+<p>这个parser有两参数，尝试匹配的规则以及恰好在这个规则之后的规则。与<code>many</code>一样，第一个规则会匹配0次或者多次，但是如果两个规则都不匹配，会报错。下面的例子尝试匹配字母，并期望后面跟着数字：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">manyTill</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span> <span class="s">&#34;hello12345&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">manyTill</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span> <span class="s">&#34;12345&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">manyTill</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span> <span class="s">&#34;hello 12345&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">6</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34; &#34;</span>
+<span class="nf">expecting</span> <span class="nf">digit</span> <span class="nf">or</span> <span class="nf">letter</span></code></pre></div>
+<p>注意，必须要记住，它会消费（并输出）所有的第一个规则，并且消费第二个规则匹配的任何东西（但是在输出中忽略)。当我们开始把规则串联起来，我们消费了什么，以及下一个规则要处理什么，会变得更加的重要。</p>
+
+<p>我认为Parsec非常好的一点是，它提供了非常直接及时的错误信息，包括我们开头传的字符串（<code>&quot;(source)&quot;</code>)，错误的行号列号，以及一些指明哪里错了的有用信息。现在我们只处理了单行inxi，但是从单词的角度出发的酷。</p>
+
+<h2 id="组合规则">组合规则</h2>
+
+<p>现在我们已经有了基本规则的经验了，接下来我们聊聊怎么把他们组合起来。Parsec，作为一个monadic，允许我们可以使用Haskell的<code>do</code>语法糖来写解析器。下面是一个把上面的简单规则拼凑成一个序列的例子，获取字母数字对并返回：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- This looks for letters, then spaces, then digits.</span>
+<span class="c1">-- we then return letters and digits in a tuple.</span>
+<span class="nf">myParser</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParser</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="nf">letters</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span>
+    <span class="nf">digits</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span>
+    <span class="nf">return</span> <span class="p">(</span><span class="nf">letters</span><span class="p">,</span><span class="nf">digits</span><span class="p">)</span></code></pre></div>
+<p>注意到我给显式的给了这个parser的类型<code>Parsec.Parsec String () (String,String)</code>。这个类型的参数类型，按按顺序来，是输入类型、想要在parser之间保持的一些状态（这里使用的是unit类型，也就是没有有意义的状态，稍后会快速的介绍一下），以及输出类型。在这个例子中，一个<code>String</code>作为输入，返回一个两个<code>String</code>的元组。在ghci中用<code>:type</code>查看这个规则的类型，会看到他们有<code>ParsecT</code>类型而不是<code>Parsec</code>类型构造的。<code>ParsecT</code>只是一个monad transformer，与<code>Parsec.Parsec</code>有相同的类型，但是有一个参数<code>m</code>来表明其包装的monad。无需多言，这两个类型是一样的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- I have to import the identity monad to use in the ParsecT definition:</span>
+<span class="kr">import</span> <span class="nn">Control.Monad.Identity</span> <span class="p">(</span><span class="kt">Identity</span><span class="p">)</span>
+
+<span class="nf">myParser1</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">ParsecT</span> <span class="kt">String</span> <span class="nb">()</span> <span class="kt">Identity</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParser1</span> <span class="ow">=</span> <span class="nf">myParser</span>
+
+<span class="nf">myParser2</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParser2</span> <span class="ow">=</span> <span class="nf">myParser</span></code></pre></div>
+<p>当在<code>Parsec</code>包中查看函数类型时，在脑子里记住这一点，会帮助你理解你在处理什么东西。每个规则都有相似的类型，虽然返回值各个规则都不一样。比如，<code>Parsec.many</code>返回一个所有匹配的数组。可以自己在ghci中看看。</p>
+
+<p>不管怎么说，我们已经定义了<code>myParser</code>，可以把它传给<code>parse</code>函数了：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myParser</span> <span class="s">&#34;hello 1000&#34;</span>
+<span class="kt">Right</span> <span class="p">(</span><span class="s">&#34;hello&#34;</span><span class="p">,</span><span class="s">&#34;1000&#34;</span><span class="p">)</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myParser</span> <span class="s">&#34;woohoooo0!!&#34;</span>
+<span class="kt">Right</span> <span class="p">(</span><span class="s">&#34;woohoooo&#34;</span><span class="p">,</span><span class="s">&#34;0&#34;</span><span class="p">)</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myParser</span> <span class="s">&#34;1000&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;1&#34;</span>
+<span class="nf">expecting</span> <span class="nf">letter</span></code></pre></div>
+<p>因为我们用的<code>Parsec.many1</code>，要求输入至少有一个字母，其后面跟着一个或者多个空格，最后跟着至少一个数字。我们的规则把这些包装成一个元组（但是也可以把他们包装成一个自定义类型或者任何
+其他形式）。</p>
+
+<p>假如我们有一系列的字母数字对，被一些分隔符分割，比如逗号。这个例子中，我们想要把他们解析成元组的列表。我们来定义一个解析分隔符的规则</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">mySeparator</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="nb">()</span>
+<span class="nf">mySeparator</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;,&#39;</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span></code></pre></div>
+<p>我又添加了显式的类型，因为当我在在测试文件中写独立的调用时，Haskell不能推断出类型。注意，只有最后一行是返回的东西，和签名的类型的是一致。其他之前的parser的返回值被忽略了。当然我们可以在一行显式的<code>return ()</code>，不过<code>Parsec.spaces</code>已经做了这件事。</p>
+
+<p>这个规则匹配0个或者多个空格，后跟一个逗号，再接着0或多个空格，由于我们不关心这些规则的返回值，我们可以把上面的代码脱糖成一行：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">mySeparator</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span> <span class="o">&gt;&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;,&#39;</span> <span class="o">&gt;&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span></code></pre></div>
+<p>现在有了<code>myParser</code>和<code>mySeparator</code>，每个都是由更小的规则构成的。用同样的方式，我们可以把新的规则组成更大的规则。还是根据上面学到的，来构建一个更冗长的规则：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">--I want to return a list of pairs, this time.</span>
+<span class="nf">myPairs</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">[(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)]</span>
+<span class="nf">myPairs</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="o">$</span> <span class="kr">do</span>
+    <span class="nf">pair</span> <span class="ow">&lt;-</span> <span class="nf">myParser</span>
+    <span class="nf">mySeparator</span>
+    <span class="nf">return</span> <span class="nf">pair</span></code></pre></div>
+<p>只是简单的用<code>Parsec.many</code>去解析0次或多次<code>myParser</code>后面跟着<code>mySeparator</code>的实例。注意，我用了<code>do</code>的语法糖来构建要给规则，之后把这个规则来传给<code>Parsec.many</code>。下面是脱糖的写法，可以清楚的看<code>do</code>块是<code>Parsec.many</code>的一个参数：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">myPairs</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="p">(</span><span class="nf">myParser</span> <span class="o">&gt;&gt;=</span> <span class="nf">\pair</span> <span class="ow">-&gt;</span> <span class="nf">mySeparator</span> <span class="o">&gt;&gt;</span> <span class="nf">return</span> <span class="nf">pair</span><span class="p">)</span></code></pre></div>
+<p>鉴于<code>Parsec.many</code>返回一个列表（从类型签名的最后可以看出来），这个结果就是一个<code>(String, String)</code>的列表，我们来运行一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myPairs</span> <span class="s">&#34;hello 1, byebye 2,&#34;</span>
+<span class="kt">Right</span> <span class="p">[(</span><span class="s">&#34;hello&#34;</span><span class="p">,</span><span class="s">&#34;1&#34;</span><span class="p">),(</span><span class="s">&#34;byebye&#34;</span><span class="p">,</span><span class="s">&#34;2&#34;</span><span class="p">)]</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myPairs</span> <span class="s">&#34;&#34;</span>
+<span class="kt">Right</span> <span class="kt">[]</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myPairs</span> <span class="s">&#34;hello 1, byebye 2&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">18</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="nf">end</span> <span class="kr">of</span> <span class="nf">input</span>
+<span class="nf">expecting</span> <span class="nf">digit</span><span class="p">,</span> <span class="nf">white</span> <span class="nf">space</span> <span class="nf">or</span> <span class="s">&#34;,&#34;</span></code></pre></div>
+<p>可以看到，使用<code>Parsec.many</code>，解析器发现没有匹配的实例，是不会报错的。但是如果一旦开始匹配输入了，失败（比如最后缺少了一个分隔符）就会导致报错。像这种普遍的分隔符分割项目的模式，有内置的函数专门进行处理。</p>
+
+<h3 id="parsec-endby"><code>Parsec.endBy</code></h3>
+
+<p>接受两个参数，一个解析项目的规则，一个解析分隔符的规则。本质上，<code>Parsec.endBy</code>和上面的函数一样，总是期望一个符合规则的字符串，然后一个分隔符，返回一个数组，元素是规则的返回值。</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- I want to return a list of pairs as above but using a built in helper:</span>
+<span class="nf">myPairs2a</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">[(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)]</span>
+<span class="nf">myPairs2a</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">endBy</span> <span class="nf">myParser</span> <span class="nf">mySeparator</span></code></pre></div>
+<h3 id="parsec-sepby"><code>Parsec.sepBy</code></h3>
+
+<p>接受和和<code>Parsec.endBy</code>相同的两个参数，但是解析完最后一个项目之后，期望后面不跟着分隔符：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- I want to return a list of pairs without a final separator:</span>
+<span class="nf">myPairs2b</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">[(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)]</span>
+<span class="nf">myPairs2b</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">sepBy</span> <span class="nf">myParser</span> <span class="nf">mySeparator</span></code></pre></div>
+<p>这个规则不要求最后是一个分隔符（实际上，如果最后是个分隔符会报错(注：第二个例子不是原文的例子)：</p>
+<div class="highlight"><pre class="chroma">ghci&gt; parse myPairs2b &#34;hello 1, bye 2&#34;
+Right [(&#34;hello&#34;,&#34;1&#34;),(&#34;bye&#34;,&#34;2&#34;)]
+ghci&gt; parse myPairs2b &#34;hello 1, bye 2,&#34;
+Left &#34;(source)&#34; (line 1, column 16):
+unexpected end of input
+expecting white space or letter</pre></div>
+<h2 id="使用-parsec-choice-和-匹配多个规则中的一个">使用<code>Parsec.choice</code>和 <code>&lt;|&gt;</code>匹配多个规则中的一个</h2>
+
+<p>使用<code>Parsec.choice</code>或者中缀操作符<code>Parsec.&lt;|&gt;</code>（<code>Control.Applicative</code>中也有），我们可以解析不止一个规则，而第一个<strong>成功消费输入</strong>的规则会被使用（即使之后失败了也是如此，会得到一个警告）。我们来看看在实践上，它是怎么去掉我们的myParirs规则对结尾的分隔符的需要的：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">--I want to return a list of pairs with an optional end separator.</span>
+<span class="nf">myPairs2</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">[(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)]</span>
+<span class="nf">myPairs2</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="o">$</span> <span class="kr">do</span>
+    <span class="nf">pair</span> <span class="ow">&lt;-</span> <span class="nf">myParser</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">choice</span> <span class="p">[</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">eof</span><span class="p">,</span> <span class="nf">mySeparator</span><span class="p">]</span>
+    <span class="nf">return</span> <span class="nf">pair</span></code></pre></div>
+<p>现在，我们的规则会消费多个字母数字对，每个后面跟着一个文件结束标记（parsec提供的规则）或则我们定义的分隔符，可以使用中缀操作符：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="kr">import</span> <span class="nn">Text.Parsec</span> <span class="p">(</span><span class="o">&lt;|&gt;</span><span class="p">)</span>
+
+<span class="nf">myPairs3</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">[(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)]</span>
+<span class="nf">myPairs3</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="o">$</span> <span class="kr">do</span>
+    <span class="nf">pair</span> <span class="ow">&lt;-</span> <span class="nf">myParser</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">eof</span> <span class="o">&lt;|&gt;</span> <span class="nf">mySeparator</span>
+    <span class="nf">return</span> <span class="nf">pair</span></code></pre></div>
+<p>在这里我引入了<code>&lt;|&gt;</code>操作符，所以不用给它加前缀，也没有那么丑了。中缀操作符和<code>Parsec.choices</code>都支持多个选择，比如<code>Parsec.choice [rule1, rule2, rule3]</code> or <code>rule1 &lt;|&gt; rule2 &lt;|&gt; rule3</code>。在两个例子中，序列中第一个消费了输入的规则会被使用。由于接受文件结束标记或者我们自定义的分隔符，结尾不在需要分隔符了：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myPairs2</span> <span class="s">&#34;hello 1, byebye 2,&#34;</span>
+<span class="kt">Right</span> <span class="p">[(</span><span class="s">&#34;hello&#34;</span><span class="p">,</span><span class="s">&#34;1&#34;</span><span class="p">),(</span><span class="s">&#34;byebye&#34;</span><span class="p">,</span><span class="s">&#34;2&#34;</span><span class="p">)]</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">myParis2</span> <span class="s">&#34;hello 1, byebye 2&#34;</span>
+<span class="kt">Right</span> <span class="p">[(</span><span class="s">&#34;hello&#34;</span><span class="p">,</span><span class="s">&#34;1&#34;</span><span class="p">),(</span><span class="s">&#34;byebye&#34;</span><span class="p">,</span><span class="s">&#34;2&#34;</span><span class="p">)]</span></code></pre></div>
+<p>要记住，第一个消费了输入的规则会被使用，这点很重要。这也许会导致出乎意料的失败。比如下面这个例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;howdy&#34;</span><span class="p">)</span> <span class="s">&#34;howdy&#34;</span></code></pre></div>
+<p>随便来个人可能会认为这个parser先尝试匹配<code>&quot;hello&quot;</code>，并且会失败，然后在匹配<code>&quot;howdy&quot;</code>的时候回成功。而实际上，这个解析会完全的失败：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;howdy&#34;</span><span class="p">)</span> <span class="s">&#34;howdy&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;o&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;hello&#34;</span></code></pre></div>
+<p>这是因为尝试匹配字符串<code>&quot;hello&quot;</code>时，<code>Parsec.string &quot;hello&quot;</code>创建的规则成功消费了<code>'h'</code>，所以这个规则被选择使用，随后在下一个字符匹配失败。下面一个例子会更清楚：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;bye&#34;</span><span class="p">)</span> <span class="s">&#34;bye&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;bye&#34;</span></code></pre></div>
+<p>这里，第一个规则在成功消费任何输入之前就失败了，所以第二个规则被选择没有任何问题。由于性能的原因，默认的情况下，Parsec不会“向前”看一个规则是否匹配。第一个解决方案（可能也是性能最好的）是将任何输入里相同的部分单独解析，然后再解析余下的部分，避免任何超前查看的行为，如：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span> <span class="o">&gt;&gt;</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;ello&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;owdy&#34;</span><span class="p">))</span> <span class="s">&#34;howdy&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;owdy&#34;</span></code></pre></div>
+<p>注意，由于忽略了第一个parser（消费了<code>'h'</code>）的结果，所以没有返回整个字符串。如果有必要，这个是很容易改进的，可以把上面的一行标记改成一个更显式的规则：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">helloOrHowdy</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="kt">String</span>
+<span class="nf">helloOrHowdy</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="nf">first</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span>
+    <span class="nf">rest</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;ello&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;owdy&#34;</span>
+    <span class="nf">return</span> <span class="p">(</span><span class="nf">first</span><span class="kt">:</span><span class="nf">rest</span><span class="p">)</span></code></pre></div>
+<p>通过手动决定哪些需要从规则里返回，我们可以通过把初始的字符加到余下的字符串上的方式来返回正确的字符串。现在错误也是基于每个规则尝试消费的部分而不是整个字符串，提升了精确性，但是可能损失了清晰性：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy</span> <span class="s">&#34;allo&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;a&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;h&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy</span> <span class="s">&#34;hoops&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">2</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;o&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;owdy&#34;</span></code></pre></div>
+<p>第一个错来自<code>Parsec.char</code>，第二个则是<code>Parsec.string</code>。之后我们会展示如何提供自定义的错误信息，但我们先来看看超前查看这种更整洁的解析这些字符串的方式。</p>
+
+<h3 id="parsec-try"><code>Parsec.try</code></h3>
+
+<p>当规则变得复杂时，避免超前查看会很快变得笨重。在这些情形下，我们可以命令Parsec尝试一个规则，并且如果规则匹配失败，则回退到之前的状态。<code>Parsec.try</code>就是做的这件事，它会catch任何失败，并且回退。考虑到性能的影响，最好是把超前查看保持在一个尽可能小的范围内，<code>try</code>函数中的可能的解析越少越好。<code>Parsec.try</code>把被包入的规则的报错信息都截获了，因此如果不正确使用的话，可能会导致产生奇怪并且没有任何帮助的错误信息。这个意思是，如果使用得当，我们能够体验到良好的错误信息的优点，我们来试一下：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">helloOrHowdy2</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="kt">String</span>
+<span class="nf">helloOrHowdy2</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">try</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;howdy&#34;</span></code></pre></div>
+<p>这个会产生正确的解析，通常也会有更好的错误信息，但是既然任何一个解析<code>&quot;hello&quot;</code>的失败都被拦截了，错误信息只会描述<code>choice</code>操作符或者<code>&quot;howdy&quot;</code>的匹配失败，忽略配<code>&quot;hello&quot;</code>的匹配损失败：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy2</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy2</span> <span class="s">&#34;howdy&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;howdy&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy2</span> <span class="s">&#34;boo!&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;b&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;hello&#34;</span> <span class="nf">or</span> <span class="s">&#34;howdy&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="nf">helloOrHowdy2</span> <span class="s">&#34;hellay&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;e&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;howdy&#34;</span></code></pre></div>
+<h3 id="通过-操作符自定义错误信息">通过<code>&lt;?&gt;</code>操作符自定义错误信息</h3>
+
+<p>有时候，通常在构建自己的规则是，会想要用自己定义的匹配失败的错误信息。<code>&lt;?&gt;</code>操作符允许把一个自定义错误信息很简单的附加到任何一个规则上。我们来看看实际效果：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="s">&#34;wrongstring&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;w&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;hello&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span> <span class="o">&lt;?&gt;</span> <span class="s">&#34;a common greeting&#34;</span><span class="p">)</span> <span class="s">&#34;wrongstring&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;w&#34;</span>
+<span class="nf">expecting</span> <span class="nf">a</span> <span class="nf">common</span> <span class="nf">greeting</span></code></pre></div>
+<p>我们简单的把一个错误信息附加到了一个<code>Parsec.string</code>产生的规则上。<code>&lt;?&gt;</code>的优先级是最低的，以为这任何其他的东西都会优先求值。以把一个新的错误信息附加到由<code>&lt;|&gt;</code>产生的规则链为例，那么当所有的规则都匹配失败了并且*没有消费任何输入*，这个错误信息才会被使用。只要有一个规则消费了输入，那么这个规则的错误信息将会用来描述整体的失败（当然除了这个规则被<code>try</code>包了起来）。这个基本的例子说明了这个事实：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- this fails without consuming any input:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;apple&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;bat&#34;</span> <span class="o">&lt;?&gt;</span> <span class="s">&#34;boom!&#34;</span><span class="p">)</span> <span class="s">&#34;cat&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;c&#34;</span>
+<span class="nf">expecting</span> <span class="nf">boom</span><span class="o">!</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- this consumes input before failing:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;apple&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;bat&#34;</span> <span class="o">&lt;?&gt;</span> <span class="s">&#34;boom!&#34;</span><span class="p">)</span> <span class="s">&#34;aunty&#34;</span>
+<span class="kt">Left</span> <span class="s">&#34;(source)&#34;</span> <span class="p">(</span><span class="nf">line</span> <span class="mi">1</span><span class="p">,</span> <span class="nf">column</span> <span class="mi">1</span><span class="p">)</span><span class="kt">:</span>
+<span class="nf">unexpected</span> <span class="s">&#34;u&#34;</span>
+<span class="nf">expecting</span> <span class="s">&#34;apple&#34;</span></code></pre></div>
+<p>如果想要给创建的规则一个自定义的错误信息，可以把规则装进<code>try</code>里，catch这些可能的错误信息，并且提供自己的错误信息。这儿有一个简单的例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- here we parse a basic greeting with no custom errors:</span>
+<span class="nf">greeting</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="kt">String</span>
+<span class="nf">greeting</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;olla&#34;</span> <span class="o">&lt;|&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;ello&#34;</span>
+    <span class="nf">return</span> <span class="s">&#34;greeting&#34;</span>
+
+<span class="c1">--parse the same greeting, but wrap in try and add custom error:</span>
+<span class="nf">greeting2</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="kt">String</span>
+<span class="nf">greeting2</span> <span class="ow">=</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">try</span> <span class="nf">greeting</span> <span class="o">&lt;?&gt;</span> <span class="s">&#34;a greeting!&#34;</span></code></pre></div>
+<p>这种做做法对于更重要的规则并不推荐，因为来自子规则的精确的错误信息会被更一般且较少帮助信息的错误信息替换掉。然而，当构建小的规则时，提供自己的错误信息会比<code>Parsec</code>提供的更有描述性。</p>
+
+<h2 id="利用applicative函数做到更简洁的解析">利用applicative函数做到更简洁的解析</h2>
+
+<p>模块<code>Control.Applicative</code>引入了几个函数，多数是中缀操作符，在正确的场合，这些可以让规则更简洁可读。很明显我明已经使用过了这样的一个操作符<code>&lt;|&gt;</code>。Applicative函数常常使得代码变短，因为他们都是与point-free相关的，也就是不显式的引用传入的参数。</p>
+
+<p>我们来把最初的parser改成applicative形式，看看每个操作符干了什么：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- lets start again with our first parser to parse a letter/digit pair:</span>
+<span class="nf">myParser</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParser</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="nf">letters</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span>
+    <span class="nf">digits</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span>
+    <span class="nf">return</span> <span class="p">(</span><span class="nf">letters</span><span class="p">,</span><span class="nf">digits</span><span class="p">)</span>
+
+<span class="c1">-- in applicative style:</span>
+<span class="nf">myParserApp</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParserApp</span> <span class="ow">=</span> <span class="p">(,)</span> <span class="o">&lt;$&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span> <span class="o">&lt;*&gt;</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span>
+
+<span class="c1">-- could also be written as:</span>
+<span class="nf">myParserApp2</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParserApp2</span> <span class="ow">=</span> <span class="nf">liftA2</span> <span class="p">(,)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span>
+
+<span class="c1">-- or even (swapping *&gt; for the more familiar &gt;&gt;):</span>
+<span class="nf">myParserApp</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">String</span><span class="p">,</span><span class="kt">String</span><span class="p">)</span>
+<span class="nf">myParserApp2</span> <span class="ow">=</span> <span class="nf">liftA2</span> <span class="p">(,)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">letter</span><span class="p">)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">spaces</span> <span class="o">&gt;&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">many1</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">digit</span><span class="p">)</span></code></pre></div>
+<p>我们来一个一个看看主要的applicative操作符，看看它们到底干了什么事：</p>
+
+<h3 id="和"><code>&lt;$&gt;</code>和<code>&lt;*&gt;</code></h3>
+
+<p>这个操作符本质上是<code>fmap</code>。左操作数是一个函数，右操作数是一个规则，并把规则的结果在返回之前传给这个函数（当规则匹配成功时，如果匹配失败，则是得到一个解析错误）。如果想要把这个函数应用到多个参数，用<code>&lt;*&gt;</code>分割参数。来看看ghci中的例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- apply the result to a tuple constructor:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">((,)</span> <span class="o">&lt;$&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">&lt;*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">)</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="sc">&#39;b&#39;</span><span class="p">)</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- put the result into an array:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">((</span><span class="nf">\a</span> <span class="nf">b</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="nf">a</span><span class="p">,</span><span class="nf">b</span><span class="p">])</span> <span class="o">&lt;$&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">&lt;*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">)</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;ab&#34;</span></code></pre></div>
+<p>整洁的一点就是无论需要多少个参数，都可以在通过在后面加一个<code>&lt;*&gt;</code>来串联起来。</p>
+
+<h3 id="liftax"><code>liftAx</code></h3>
+
+<p>上面的一个前缀版本，<code>liftAx</code>接受*x*个后续参数，并把他们传给第一个。没有中缀版本那么灵活，但是有时会更加可读。这是一个和上面完全一样的例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- apply the result to a tuple constructor:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="nf">liftA2</span> <span class="p">(,)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span><span class="p">)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">))</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="sc">&#39;b&#39;</span><span class="p">)</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="c1">-- put the result into an array:</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="nf">liftA2</span> <span class="p">(</span><span class="nf">\a</span> <span class="nf">b</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="nf">a</span><span class="p">,</span><span class="nf">b</span><span class="p">])</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span><span class="p">)</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">))</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;ab&#34;</span></code></pre></div>
+<h3 id="和-1"><code>&lt;*</code>和<code>*&gt;</code></h3>
+
+<p>有时会想要匹配一下规则，除了其中的一个，其余的结果都扔掉。这两个操作符接受两个规则，并且返回尖括号指向的规则的结果。例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">&lt;*</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">)</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;a&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span><span class="p">)</span> <span class="s">&#34;ab&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;b&#39;</span></code></pre></div>
+<p>同样可以串联起来，这样可以忽略几个规则：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">&lt;*</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span> <span class="o">&lt;*</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;c&#39;</span><span class="p">)</span> <span class="s">&#34;abc&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;a&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span> <span class="o">&lt;*</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;c&#39;</span><span class="p">)</span> <span class="s">&#34;abc&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;b&#39;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;a&#39;</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;b&#39;</span> <span class="o">*&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;c&#39;</span><span class="p">)</span> <span class="s">&#34;abc&#34;</span>
+<span class="kt">Right</span> <span class="sc">&#39;c&#39;</span></code></pre></div>
+<p>当想要做一些类似去空格什么的或者从一些片段中提取某个片段的时候，这个经常会会特别方便。</p>
+
+<h3 id="toc_18"><code>&lt;$</code></h3>
+
+<p>匹配右边的规则，并且如果左边的规则匹配成功，则返回左边的结果。我们来看看做这个事情的一些等价的方式：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="s">&#34;greeting!&#34;</span> <span class="o">&lt;$</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;greeting!&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span> <span class="o">&gt;&gt;</span> <span class="nf">return</span> <span class="s">&#34;greeting!&#34;</span><span class="p">)</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;greeting!&#34;</span>
+<span class="nf">ghci</span><span class="o">&gt;</span> <span class="nf">parse</span> <span class="p">(</span><span class="nf">return</span> <span class="s">&#34;greeting!&#34;</span> <span class="o">&lt;*</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">string</span> <span class="s">&#34;hello&#34;</span><span class="p">)</span> <span class="s">&#34;hello&#34;</span>
+<span class="kt">Right</span> <span class="s">&#34;greeting!&#34;</span></code></pre></div>
+<p>可以看到，这些不同的方式都没有减少代码。我自己会选用更明显的第二种方式，虽然它比第一种长了一些，但是你们自己随意。</p>
+
+<h2 id="处理状态">处理状态</h2>
+
+<p>最近我了解到可以在parser之间保持状态。当需要跟踪某个事情时，这非常有用，比如缩进的层数。这是一个非常简单的利用状态数字母的例子：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="c1">-- matches char &#39;h&#39;, incrementing int state by 1</span>
+<span class="c1">-- each time one is seen.</span>
+<span class="nf">hCountParser</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="kt">Int</span> <span class="nb">()</span>
+<span class="nf">hCountParser</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span>
+    <span class="nf">c</span> <span class="ow">&lt;-</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">getState</span>
+    <span class="kr">let</span> <span class="nf">c&#39;</span> <span class="ow">=</span> <span class="nf">c</span><span class="o">+</span><span class="mi">1</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">putState</span> <span class="nf">c&#39;</span>
+    <span class="nf">return</span> <span class="nb">()</span>
+
+<span class="c1">-- parse as many h&#39;s as we can, then return the state</span>
+<span class="c1">-- to see how many there were</span>
+<span class="kt">Parsec</span><span class="o">.</span><span class="nf">runParser</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="nf">hCountParser</span> <span class="o">&gt;&gt;</span> <span class="kt">Parsec</span><span class="o">.</span><span class="nf">getState</span><span class="p">)</span> <span class="mi">0</span> <span class="s">&#34;&#34;</span> <span class="s">&#34;hhhhhhhhhhhhellooo&#34;</span></code></pre></div>
+<p>对于<code>get</code>and<code>set</code>，我们可以用<code>Parsec.modifyState</code>来原地修改状态。一个hCountParser简单的版本：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">hCountParser&#39;</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">Parsec</span> <span class="kt">String</span> <span class="kt">Int</span> <span class="nb">()</span>
+<span class="nf">hCountParser&#39;</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">char</span> <span class="sc">&#39;h&#39;</span>
+    <span class="kt">Parsec</span><span class="o">.</span><span class="nf">modifyState</span> <span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nf">return</span> <span class="nb">()</span></code></pre></div>
+<p>值得注意的是，作为一个monad transformer，我们也有这样一个选择，把parser和类似于<code>State</code>  monad的东西结合，来保存状态。这种方式与monad transformer的做事方式更一致。使用<code>State</code> monad，则是下面这样：</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="kr">import</span> <span class="nn">Control.Monad</span>       <span class="p">(</span><span class="nf">lift</span><span class="p">)</span>
+<span class="kr">import</span> <span class="nn">Control.Monad.State</span> <span class="k">as</span> <span class="n">S</span>
+
+<span class="nf">hCountParser&#39;&#39;</span> <span class="ow">::</span> <span class="kt">Parsec</span><span class="o">.</span><span class="kt">ParsecT</span> <span class="kt">String</span> <span class="nb">()</span> <span class="p">(</span><span class="kt">S</span><span class="o">.</span><span class="kt">State</span> <span class="kt">Int</span><span class="p">)</span> <span class="nb">()</span>
+<span class="nf">hCountParser&#39;&#39;</span> <span class="ow">=</span> <span class="kr">do</span>
+    <span class="nf">char</span> <span class="sc">&#39;h&#39;</span>
+    <span class="nf">lift</span> <span class="o">$</span> <span class="nf">modify</span> <span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">-- after running our parser transformer, we get back our unevaluated inner state, which</span>
+<span class="c1">-- contains our parser result and state (&#39;h&#39; count). We only want the state so</span>
+<span class="c1">-- we use execState rather than runState or evalState to execute and unwrap the state monad,</span>
+<span class="c1">-- providing an initial state to start the ball rolling.</span>
+<span class="kt">S</span><span class="o">.</span><span class="nf">execState</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">runParserT</span> <span class="p">(</span><span class="kt">Parsec</span><span class="o">.</span><span class="nf">many</span> <span class="nf">hCountParser2</span><span class="p">)</span> <span class="nb">()</span> <span class="s">&#34;&#34;</span> <span class="s">&#34;hhhhhhhhhhhhellooo&#34;</span><span class="p">)</span> <span class="mi">0</span></code></pre></div>
+<h2 id="总结">总结</h2>
+
+<p>我们已经了解了一些内置的函数和规则，之后又看了看如何通过组合规则来构建大的规则，包括在多个规则之中选择、通过<code>try</code>来超前查看，最后添加了向自己的规则添加自定义的错误信息，并且快速的尝试了一下保存状态。有了以上的经验，接下来应该会很容易了！</p>
+
+<p>我建议在ghci下，通过别名引入<code>Parsec</code>模块（或者qualified引入）并且使用tab键来获得<code>Parsec</code>提供的所有东西，详细考察<code>Parsec</code>的函数。对这些函数使用<code>:type</code>，会让你对其有更深的理解，同样也是我探索这么多的函数的基础。*Real World Haskell*的这一章（<a href="http://book.realworldhaskell.org/read/using-parsec.html">英文版</a>，<a href="http://cnhaskell.com/chp/16.html">中文版</a>）也是非常好的教程，并且有更为大量的实际例子，虽然其中的一小部分已经过时了。</p>
+
+<p>我希望这篇文章能给你提供帮助。如果我漏掉了什么，请留下你的评论，让我知道！</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2015/2015-12-20-just-talk/">年末瞎扯淡</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2015.12.20</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E4%BB%A3%E7%A0%81%E4%B9%8B%E5%A4%96">代码之外</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E8%83%A1%E8%A8%80%E4%B9%B1%E8%AF%AD">胡言乱语</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>前几天糊里糊涂的就开完题了，开题之前就知道不做这个题目。现在对于论文很烦，不知道怎么搞。根本就不是写论文的料。</p>
+
+<p>Angular2的beta版出来了，今天照着quickstart和tutorial，敲了一会儿。1和2的差别相当的大，完全推翻了原来的风格。这个跨度比Python的2和3打了好几倍。Angular支持TypeScript，感觉和ES6的风格很像，除了有类型声明，都有写React的感觉了。</p>
+
+<p>下午在忙一个活，是个商城的后台系统。任务是在某个报表里添加一个搜索条件。开头以为不好弄，因为我以为还要改这个搜索调用的存储过程。过程中发现貌似不用改，难度瞬间下降，以为分分钟的事。但是，事情往往和自己想的不一样啊。不加条件执行的没有问题，加了条件就没有结果，但是在数据库里直接执行SQL没有问题，调试了才发现，超时了。然后我设置了120秒的超时时间。OK，搞定。但是呢，还有另一个报表，也需要改。不过就想，没压力啊，根本就是一个逻辑。不过结果并非如此啊，这个存储过程的比刚才的多了几个参数，但问题是多的几个参数，在写代码的时候，已经把这几个参数添加到另一个参数里了。相当于是这几个条件执行了两遍，也不知道数据库是不是能优化。之前已经把超时设置了120秒，这次我又设置了600秒，因为在数据库里执行，用了6分多钟，日了狗了。</p>
+
+<p>实验室的一个项目，要用Meteor，然后学了学。这玩意儿是个全端的框架，一套代码同时运行在服务器端和客户端。卖点在实时，数据库的变动，实时反映在客户端。写这个，思路和以前的不一样，完全是一套自己的东西，所以公司里用的不是很多。挺好玩的一个东西。</p>
+
+<p>以上是昨天写的，今天基本啥都没干，看了两场球，世俱杯，恒大打广岛三箭，巴萨打河床，可惜恒大输了，巴萨发挥正常。</p>
+
+<p>不知道写啥，就这样算了吧，还能看场皇马的联赛。</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2015/2015-09-19-implement-haskell-map-function-in-cpp/">在C&#43;&#43;中实现Haskell的map函数</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2015.9.19</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/haskell">Haskell</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/c&#43;&#43;">C&#43;&#43;</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>C++11中引入了lambda，类似如下的语法</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="p">[</span><span class="n">value</span><span class="p">](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">int</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">;</span> <span class="p">}</span>
+</code></pre></div>
+<p>其中，<code>[]</code>中的部分，是捕获外界变量，<code>()</code>中的部分则是参数，<code>-&gt;</code>表明返回类型，<code>{}</code>中是函数体。</p>
+
+<p>正好这几天在看Haskell，于是想要在C++中实现Haskell中的<code>map</code>函数。Haskell中，<code>map</code>的的效果与下面的代码效果相同，</p>
+<div class="highlight"><pre class="chroma"><code class="language-haskell" data-lang="haskell"><span class="nf">map</span> <span class="ow">::</span> <span class="p">(</span><span class="nf">a</span> <span class="ow">-&gt;</span> <span class="nf">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="nf">a</span><span class="p">]</span> <span class="ow">-&gt;</span> <span class="p">[</span><span class="nf">b</span><span class="p">]</span>
+<span class="nf">map</span> <span class="kr">_</span> <span class="kt">[]</span> <span class="ow">=</span> <span class="kt">[]</span>
+<span class="nf">map</span> <span class="nf">f</span> <span class="p">(</span><span class="nf">x</span><span class="kt">:</span><span class="nf">xs</span><span class="p">)</span> <span class="ow">=</span> <span class="nf">f</span> <span class="nf">x</span><span class="kt">:</span> <span class="nf">map</span> <span class="nf">f</span> <span class="nf">xs</span></code></pre></div>
+<p>实际上是一个列表中的所有元素都用给定的函数进行计算，其结果保存为一个新的列表。</p>
+
+<p>我期望最终的<code>map</code>函数，可以进行这样的调用</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// lambda，多态
+</span><span class="c1"></span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ir</span> <span class="o">=</span> <span class="n">map</span><span class="p">([](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">x</span><span class="p">;</span> <span class="p">},</span> <span class="n">int_vec</span><span class="p">);</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span> <span class="n">br</span> <span class="n">map</span><span class="p">([](</span><span class="kt">double</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="p">},</span> <span class="n">double_vec</span><span class="p">);</span>
+
+<span class="c1">// 函数指针
+</span><span class="c1"></span><span class="kt">int</span> 
+<span class="nf">f</span><span class="p">(</span><span class="n">string</span> <span class="n">s</span><span class="p">)</span>
+ 
+<span class="p">{</span> <span class="k">return</span> <span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">()</span> <span class="p">}</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ir2</span> <span class="o">=</span> <span class="n">map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">string_vec</span><span class="p">);</span>
+
+<span class="c1">// functor
+</span><span class="c1"></span><span class="k">struct</span> <span class="n">F</span> <span class="p">{</span>
+	<span class="kt">int</span> <span class="k">operator</span><span class="p">()(</span><span class="kt">int</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">5</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ir3</span> <span class="o">=</span> <span class="n">map</span><span class="p">(</span><span class="n">F</span><span class="p">(),</span> <span class="n">int_vec</span><span class="p">);</span>
+</code></pre></div>
+<p>我第一次想到的函数声明是这个样子的</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span><span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">R</span><span class="o">&gt;</span>
+<span class="n">vector</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span> <span class="n">map</span><span class="p">(</span><span class="n">R</span> <span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="p">),</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">);</span>
+</code></pre></div>
+<p>这个声明的问题在于，<code>R f(T)</code>是个函数指针，不接受lambda函数和functor，让人很无奈。于是尝试将类型改为function<R(T)>，也就是下面这样（之后省略template说明）</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">vector</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span> <span class="n">map</span><span class="p">(</span><span class="n">function</span><span class="o">&lt;</span><span class="n">R</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">&gt;</span> <span class="n">f</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">);</span>
+</code></pre></div>
+<p>现在3中方式都可以了，但是问题是，需要强制类型转换。这就比较痛苦了。至此陷入了困境。然后我想C++标准库库中是有可以传入lambda的函数的。于是我打开了<code>algorithm</code>，里面有个<code>for_each</code>函数，其声明是这样的</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span><span class="o">&lt;</span><span class="k">class</span> <span class="nc">_InIt</span><span class="p">,</span>
+	<span class="k">class</span> <span class="nc">_Fn1</span><span class="o">&gt;</span> <span class="kr">inline</span>
+	<span class="n">_Fn1</span> <span class="n">for_each</span><span class="p">(</span><span class="n">_InIt</span> <span class="n">_First</span><span class="p">,</span> <span class="n">_InIt</span> <span class="n">_Last</span><span class="p">,</span> <span class="n">_Fn1</span> <span class="n">_Func</span><span class="p">)</span>
+</code></pre></div>
+<p>也就是将函数类型作为多模板参数，于是我也将我的声明修改了一下</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">vector</span><span class="o">&lt;</span><span class="n">R</span><span class="o">&gt;</span> <span class="n">map</span><span class="p">(</span><span class="n">F</span> <span class="n">f</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">);</span>
+</code></pre></div>
+<p>然后又报错了，C++编译器无法推断出R的类型。</p>
+
+<p>其实从Haskell的<code>map</code>的类型可以看出来，我们并不需要3个模板参数，输入类型T，输出类型R，函数类型F，是有关系的，<code>F(T) = R</code>，最开始，我是使用T和R来表示F，并不是很成功。从它们的关系来看，使用F和T表示R，相比之下，要比用F，R表示T来的直白的多。现在的问题是，如何使用C++的语法来表示R。</p>
+
+<p>C++11中有个<code>decltype</code>，可以用来表示一个类型。如下</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="c1">// 声明一个x类型的y
+</span><span class="c1"></span><span class="k">decltype</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+<span class="c1">// 与下面一行功能相同
+</span><span class="c1"></span><span class="k">auto</span> <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+
+<span class="c1">// 表明函数的返回类型
+</span><span class="c1"></span><span class="k">auto</span> 
+<span class="nf">f</span><span class="p">(</span><span class="kt">int</span> <span class="n">t</span><span class="p">)</span>
+ <span class="o">-&gt;</span> <span class="k">decltype</span><span class="p">(</span><span class="n">foo</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+<span class="p">;</span>
+</code></pre></div>
+<p>最后一行，则使用了<code>decltype</code>来指明函数的返回类型和<code>foot(t)</code>的类型一样。那么，我们就可以写出<code>map</code>的函数声明了</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">auto</span> <span class="n">f_map</span><span class="p">(</span><span class="n">F</span> <span class="n">f</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">vector</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="p">()))</span><span class="o">&gt;</span>
+</code></pre></div>
+<p>其中<code>decltype(f(T()))</code>，<code>T()</code>是T类型的无参构造函数。当然也可以是用<code>*begin(list)</code>或者<code>*list.end()</code>等等，<code>decltype</code>与<code>sizeof</code>类似，不会对操作数进行求值。</p>
+
+<p>最终的完整函数是这这样的</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="p">,</span> <span class="k">typename</span> <span class="n">F</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">f_map</span><span class="p">(</span><span class="n">F</span> <span class="n">f</span><span class="p">,</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">vector</span><span class="o">&lt;</span><span class="k">decltype</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="p">()))</span><span class="o">&gt;</span> <span class="p">{</span>
+	<span class="n">vector</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="p">()))</span><span class="o">&gt;</span> <span class="n">result</span><span class="p">;</span>
+	<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="n">it</span> <span class="o">=</span> <span class="n">begin</span><span class="p">(</span><span class="n">list</span><span class="p">);</span> <span class="n">it</span> <span class="o">!=</span> <span class="n">end</span><span class="p">(</span><span class="n">list</span><span class="p">);</span> <span class="o">++</span><span class="n">it</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">result</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">it</span><span class="p">));</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>现在的实现的是map，当时我还想实现更加一般化的<code>fmap</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-hs" data-lang="hs"><span class="kr">class</span> <span class="kt">Functor</span> <span class="nf">f</span> <span class="kr">where</span>
+	<span class="nf">fmap</span> <span class="ow">::</span> <span class="p">(</span><span class="nf">a</span> <span class="ow">-&gt;</span> <span class="nf">b</span><span class="p">)</span> <span class="ow">-&gt;</span> <span class="nf">f</span> <span class="nf">a</span> <span class="ow">-&gt;</span> <span class="nf">f</span> <span class="nf">b</span></code></pre></div>
+<p><code>fmap</code>并没有一个统一的实现，对于列表而言，<code>fmap</code>的实现就是<code>fmap = map</code>。注意，这里<code>Functor</code>和C++中的<code>Functor</code>不是一个概念。</p>
+
+<p>当然Haskell中的<code>Functor</code>在C++中不存在，我只是想写一个这种模式，比如对于一些容器，如<code>set</code>，<code>map</code>等等，可以进行<code>map</code>操作（实际上，这些容器，可以被定义为Haskell中的<code>Functor</code>）。但最后我放弃了，因为在C++中，这些容器并不具体有共同的基类，我可以写出函数声明，但是实现却无法统一。</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="k">template</span> <span class="o">&lt;</span><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span><span class="p">...</span><span class="o">&gt;</span> <span class="k">class</span> <span class="nc">C</span><span class="p">,</span> <span class="k">typename</span> <span class="n">F</span><span class="p">,</span> <span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span>
+<span class="k">auto</span> <span class="n">mymap</span> <span class="p">(</span><span class="n">F</span> <span class="n">f</span><span class="p">,</span> <span class="n">C</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="n">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">C</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">T</span><span class="p">()))</span><span class="o">&gt;</span><span class="p">;</span>
+</code></pre></div>
+<p>其实标准库中已经有了类似的函数，就是<code>transform</code>，不过<code>transform</code>并不返回值，而是通过一个指针，修改外部的变量</p>
+<div class="highlight"><pre class="chroma"><code class="language-cpp" data-lang="cpp"><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">result</span><span class="p">;</span>
+<span class="n">transform</span><span class="p">(</span><span class="n">begin</span><span class="p">(</span><span class="n">input</span><span class="p">),</span> <span class="n">end</span><span class="p">(</span><span class="n">input</span><span class="p">),</span> <span class="n">back_inserter</span><span class="p">(</span><span class="n">result</span><span class="p">),</span>
+		<span class="p">[](</span><span class="kt">int</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="p">;</span> <span class="p">});</span>
+</code></pre></div>
+<p><code>result</code>就是map后返回的结果。</p>
+
+<p>总体来说，由于C++和Haskell的设计理念并不相同，Haskell中的<code>fmap</code>无法（至少我无法）完全在C++中实现，而<code>map</code>由于限制较少，其实现没有问题。此外，C++的标准库中其实提供的了许多与Haskell中功能的相似的函数，但是名字并不相同，而且细节略有差异。C++的容器操作，一般是需要提供指明起止位置的iterator，对一个范围进行操作。而Haskell由于值不可修改，因此均是对所有元素进行操作的，最后返回新值。</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2015/2015-07-24-first-glance-of-react-and-redux/">React和Redux初探</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2015.7.24</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E5%89%8D%E7%AB%AF">前端</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/react">React</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/redux">Redux</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                
+
+<p>React是Facebook开发的一套前端框架，与Angular等前端MVC框架不一样的是，React关注于构建UI，其相当于MVC中的V。而React最让人欣喜的一点在于，其使用了声明的方式开发UI，这使得基于组件（Component）的前端开发变得非常直接。然而仅仅使用React，还远远不能构建一个App，还需要有数据存储和逻辑处理，这当然可以使用MVC架构。不过，Facebook认为，MVC架构中，当Model和View增多以后，双向的数据流导致系统的复杂性增加。因而Facebook提出了一个Flux。可以认为Flux是一套应用框架，与MVC不同的是，其数据流是单向的，结构如下图所示 <img src="/static/content/images/flux-simple-f8-diagram-explained-1300w.png" alt="" />
+由于数据的单向流动，无须处理<code>view-&gt;model</code>的逻辑，因此系统的结构比较清晰。</p>
+
+<h2 id="react">React</h2>
+
+<p>对于如下的html代码，</p>
+<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;post&#34;</span><span class="p"></span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h1</span> <span class="na">style</span><span class="o">=</span><span class="s">&#34;font-size: 1.6rem&#34;</span><span class="p"></span><span class="p">&gt;</span>Post Title<span class="p">&lt;</span><span class="p">/</span><span class="nt">h1</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&#34;post-content&#34;</span><span class="p"></span><span class="p">&gt;</span>Some Content<span class="p">&lt;</span><span class="p">/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="p">/</span><span class="nt">div</span><span class="p">&gt;</span></code></pre></div>
+<p>我们可以使用这样的React代码来构建</p>
+<div class="highlight"><pre class="chroma"><code class="language-js" data-lang="js"><span class="c1">// app.js
+</span><span class="c1"></span><span class="kd">var</span> <span class="nx">Post</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+    <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;post&#39;</span><span class="o">&gt;</span>
+                <span class="o">&lt;</span><span class="nx">PostTitle</span> <span class="nx">text</span><span class="o">=</span><span class="s1">&#39;Post Title&#39;</span> <span class="err">/&gt;</span>
+                <span class="o">&lt;</span><span class="nx">PostContent</span> <span class="nx">text</span><span class="o">=</span><span class="s1">&#39;Some Content&#39;</span> <span class="err">/&gt;</span>
+            <span class="o">&lt;</span><span class="err">/div&gt;</span>
+        <span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+<span class="kd">var</span> <span class="nx">PostTitle</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+    <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">style</span> <span class="o">=</span> <span class="p">{</span><span class="nx">fontSize</span><span class="o">:</span> <span class="s1">&#39;1.6rem&#39;</span><span class="p">};</span>
+        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">h1</span> <span class="nx">style</span><span class="o">=</span><span class="p">{</span><span class="nx">style</span><span class="p">}</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">text</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/h1&gt;</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+<span class="kd">var</span> <span class="nx">PostContent</span> <span class="o">=</span> <span class="nx">React</span><span class="p">.</span><span class="nx">createClass</span><span class="p">({</span>
+    <span class="nx">render</span><span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">className</span><span class="o">=</span><span class="s1">&#39;post-content&#39;</span><span class="o">&gt;</span><span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">props</span><span class="p">.</span><span class="nx">text</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+    <span class="p">}</span>
+<span class="p">});</span>
+<span class="nx">React</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span>
+    <span class="o">&lt;</span><span class="nx">Post</span> <span class="err">/&gt;,</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">);</span>
+<span class="p">);</span>
+</code></pre></div>
+<p>对应的html文件，则是</p>
+<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">div</span> <span class="na">id</span><span class="o">=</span><span class="s">&#34;root&#34;</span><span class="p"></span><span class="p">&gt;&lt;</span><span class="p">/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;text/jsx&#34;</span> <span class="na">src</span><span class="o">=</span><span class="s">&#34;app.js&#34;</span><span class="p"></span><span class="p">&gt;&lt;</span><span class="p">/</span><span class="nt">script</span><span class="p">&gt;</span></code></pre></div>
+<p>上面的<code>app.js</code>文件并不是Javascript纯粹代码，而是夹杂了一些类似HTML的代码。这是JSX代码，并不能被浏览器执行，因此需要预先编译成js代码。</p>
+
+<p>从代码中，可以看到，React将原本的html代码拆成了三个组件，其中<code>Post</code>由<code>PostTitle</code>和<code>PostContent</code>两个组件构成。最后再通过<code>React.render</code>方法，将组件挂载到dom上。每个组件中，都有一个<code>render</code>方法，表示组件将要渲染的dom结构。与HTML相比，只是可以使用<code>{}</code>将参数传入到组件中，而组件则可以通过<code>props</code>获取属性。这种结构，称之为Virtual Dom，在返回的结果中，<code>div</code>, <code>h1</code>等和自己定义的<code>Post</code>，<code>PostTitle</code>等类似，都是Virtual Dom，只不过<code>div</code>这种HTML本身已有的组件，其渲染结果就是与其对应的HTML标签。React约定，自己定义的组件使用大写字母开头，已有HTML标签为小写字母开头。并非所有HTML标签和属性都被React支持，可以在在<a href="https://facebook.github.io/react/docs/tags-and-attributes.html">这里</a>查看支持的标签和属性。其中，<code>class</code>和<code>for</code>分别使用<code>className</code>和<code>htmlFor</code>，因为这两个都是js的关键字。</p>
+
+<h2 id="redux">Redux</h2>
+
+<p>由于Flux还是属于新生事物，各种Flux实现多如牛毛，比如Reflux、Fluxxor等等，Redux也是其中的一种。Redux借鉴了函数式的编程思想，对于状态的改变，其实是如下的函数</p>
+<div class="highlight"><pre class="chroma">f(state, action) =&gt; next_state</pre></div>
+<p>这种函数在Redux里称为Reducer, 而Flux中的Store则是多个由Reducer组成。这样，对于一个Action以及当前的状态，可以转移到下一个状态，从而更新View。</p>
+
+<p>我根据其github的breaking-changes-1.0分支(<a href="https://github.com/gaearon/redux/tree/breaking-changes-1.0">地址</a>)的例子，大致明白了现在的API，但是仍有非常多的东西不是很清楚，需要等到正式版放出之后，查看文档才能明白了。</p>
+
+<p>至于Redux相比其他Flux实现有什么优点，其实我说不上来，最初吸引我的其实不是Redux，而是<a href="http://react-china.org/t/reacteurope-conf/1662">这篇文章</a>，当时也根本不了解Flux（现在其实也不了解。。），就稀里糊涂的看了Redux的例子。</p>
+
+<h2 id="前端">前端</h2>
+
+<p>感觉目前的前端越来越复杂，Javascript的应用也越来越多。甚至都有了以后找个前端工作的念头，谁知道呢。。</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2015/2015-05-24-writing-a-web-framwork/">写一个Web框架</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2015.5.24</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/python">Python</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web-framework">Web Framework</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>在知乎上偶然看到了廖雪峰老师的网站上的Python教程，<a href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000/001397616003925a3d157284cd24bc0952d6c4a7c9d8c55000">Python实战</a>，目的是从头开始写一个博客。这个从头开始是，自己造轮子，包括ORM、Web框架。对于写好框架之后的写博客等前端部分，我没有什么兴趣，而最前面的几个，都是我不清楚具体实现的，跟着教程一步一步往下走。说明一点，教程用的Python2，我用的是Python3，所以有些地方是略有区别的。</p>
+
+<p>第一部分是编写数据API，这个部分比较简单，只要了解Python的装饰器，写的过程中，查一下mysql-connector-pyhton的文档，没有什么难度。</p>
+
+<p>第二部分ORM，想要写一个功能比较完整的ORM，比较不容易。但是如果目标仅仅是可用，能够实现基本功能，难度并不太大。网站下的评论，说这一章有难度，主要都是集中在Python的metaclass，也就是元类上。我自己对元类也是不懂，查到了这篇文章，<a href="http://blog.jobbole.com/21351/">深刻理解Python中的元类(metaclass)</a>，英文原文是Stack Overflow上的一个回答，<a href="http://stackoverflow.com/questions/100003/what-is-a-metaclass-in-python">What is a metaclass in Python?</a>。</p>
+
+<p>我自己的理解，元类就是创建类的类，它控制一个类如何被创建。在Python中，有个Built-in的<code>type</code>类，可以像函数一样调用，当传给它三个函数时，就会创建一个新的类型</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">A</span><span class="p">:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">A</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="sa"></span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,),</span> <span class="p">{</span><span class="sa"></span><span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">})</span></code></pre></div>
+<p>上面代码中，两块代码的作用是一样的。传递给<code>type</code>的三个参数，分别是类型名，父类型(必须为元组)，类变量和类方法的字典。可以认为，如果不指定元类，那么<code>type</code>则充当类型的元类。而如果想要控制一个类型的创建，就需要自定义元类，通过元类来创建对象。文章中也说了，元类不一定是类，任意可以可以被调用(callable)的对象都可以作为元类。</p>
+
+<p>Python中有个<code>__new__</code>方法，这个方法的目的控制一个对象的创建，通过重写<code>__new__</code>就可以对一个类型创建进行自定义。比如教程里的<code>ModelMetaclass</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">ModelMetaclass</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="sa"></span><span class="s1">&#39;Model&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelMetaclass</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">:</span> <span class="n">y</span> <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">Field</span><span class="p">)]</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">attrs</span><span class="p">[</span><span class="sa"></span><span class="s1">&#39;__table__&#39;</span><span class="p">]</span>
+        <span class="n">real_attrs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="sa"></span><span class="s1">&#39;__mapping__&#39;</span><span class="p">:</span> <span class="n">mapping</span><span class="p">,</span>
+            <span class="sa"></span><span class="s1">&#39;__table__&#39;</span><span class="p">:</span> <span class="n">table</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">ModelMetaclass</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">real_attrs</span><span class="p">)</span></code></pre></div>
+<p>其中<code>mapping</code>是名称和类型的映射，通过这个元类，作为基类的<code>Model</code>，其创建过程保持不动，而实际的与数据库表相映射的类型，在创建时，其类变量均被放进<code>mapping</code>中。实际进行实例化时，给定的实际上是实例变量，其数据库属性可以在mapping中找到，也就是实现了数据库类型的和Python类型的映射。在ORM里，这一步是最重要的。此外，在赋值时，可以通过<code>mapping</code>来检验变量类型与定义时的数据库类型是否匹配。</p>
+
+<p>至于后面的Web框架，我还没有写完，不过根据网站上的代码架构，在适当填补一些需要的代码，比如路由表等，应该就没有大问题。当然，我在写的过程中，遇到了一些麻烦，比如对于跳转的实现不理解，现在好像明白了，实现跳转，只需要在<code>response</code>中设置<code>Location</code>的头部就行了，不过现在没有环境，不能确认是否是这样实现。</p>
+
+<p>另外就是，由于网站上只给出了一个大致的架构，自己写出类的框架和网站github上给出的，可能会有比较大的不同。</p>
+
+            </div>
+        </div>
+        
+    </div>
+    
+
+<ul class="pagination">
+    
+    <li>
+        <a href="/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li
+    >
+    <a href="/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    class="active"><a href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="disabled"><span aria-hidden="true">&hellip;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/7/">7</a></li>
+    
+    
+    <li
+    >
+    <a href="/page/3/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li>
+        <a href="/page/7/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</div>
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

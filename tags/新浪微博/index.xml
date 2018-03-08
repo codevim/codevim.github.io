@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>新浪微博 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A/</link>
+    <description>Recent content in 新浪微博 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Thu, 13 Sep 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E6%96%B0%E6%B5%AA%E5%BE%AE%E5%8D%9A/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>用Tornado连接新浪微博</title>
+      <link>https://codevim.github.io/post/2012/2012-09-13-connect-sina-weibo-with-tornado/</link>
+      <pubDate>Thu, 13 Sep 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-09-13-connect-sina-weibo-with-tornado/</guid>
+      <description>前几天心血来潮，稍稍看了一下Tornado框架，感觉这个框架和web.py很像（因为本来Tornado就是在web.py的基础上修改而来的）</description>
+    </item>
+    
+  </channel>
+</rss>

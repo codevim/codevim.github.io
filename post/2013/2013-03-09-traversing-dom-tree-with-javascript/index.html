@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>Javascript遍历DOM树 | 天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-single">
+    <div class="post">    
+    <h1 class="post-title">Javascript遍历DOM树</h1>
+    <div class="post-meta">
+    <span class="post-date">2013.3.9</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/javascript">Javascript</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jquery">jQuery</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/dom">DOM</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jekyll">Jekyll</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/liquid">Liquid</a>
+        </span>
+        
+    
+</div>
+    <div class="post-content">
+        <p>这个博客是利用Jekyll在github pages上搭建的，显示在首页的文章，如果用<code>{{ post.content | truncate: 200 }}</code>，原有的格式不能完全保持，且有时在最后会有乱码。而<code>{{ post.content | truncatewords: 50 }}</code>也有不能保持格式的问题，而且对于中文来说，word的概念大概就变成了句子，截取的长度不能确定。本来<a href="https://github.com/MattHall/truncatehtml">truncatehtml</a>这个插件可以解决格式保持的问题，但是出于安全的考虑，github pages不允许运行插件，所以。。。</p>
+
+<p>这个问题有很长时间了，今天闲的没事，用js写了一下。就是遍历DOM树，叠加文本节点的长度，当长度达到既定长度时，其后所有的节点修改style为<code>display: none</code>，用jQuery就是<code>hide()</code>，具体到自己的博客，代码如下，</p>
+<div class="highlight"><pre class="chroma">$(function() {
+    function traverse($node, len, maxCount) {
+      var reachMaxCount = len &gt; maxCount;
+      if (reachMaxCount) {
+        $node.hide();
+      }
+      var $contents = $node.contents();
+      for (var i = 0; i &lt; $contents.length; ++i) {
+        if (reachMaxCount) {
+          $contents.eq(i).hide();
+          continue;
+        }
+        if ($contents[i].nodeType == 3) { // TextNode
+          var tmp = len;
+          var s = $contents[i].nodeValue;
+          len += s.length;
+          reachMaxCount = len &gt; maxCount;
+          if (reachMaxCount) {
+            $contents[i].nodeValue = s.substring(0, maxCount - tmp);
+          }
+        }
+        else if ($contents[i].nodeType == 1) { // Element
+          len = traverse($contents.eq(i), len, maxCount);
+        }
+      }
+      return len;
+    }
+
+    $(&#39;.post_at_index&#39;).each(function() {
+      traverse($(this), 0, {{ site.description_length }});
+      var thisUrl = $(this).siblings().first().children().attr(&#39;href&#39;);
+      $(this).after(&#39;\n&lt;a href=&#34;&#39; + thisUrl + &#39;&#34; rel=&#34;nofollow&#34;&gt;&#39; + &#39;Read More ...&lt;/a&gt;&#39;);
+    });
+});</pre></div>
+<p>对于js，我都会使用jQuery，这个同样如此，需要jQuery的支持。在最后加上了了read more，指向页面。写完之后，发现代码不长，不过却花了我一个下午的时间，主要是对js太不熟悉了，上网各种查，开始是用的<code>children()</code>这个方法，但是这个不能处理很好，后来改成了<code>contents()</code>，不过已经浪费了很长时间了。。</p>
+
+<p>另外吐槽一下Liquid这个模板，规避标签太麻烦了，比如要打一个</p>
+<div class="highlight"><pre class="chroma">{{ some tag }}
+{% some tag %}</pre></div>
+<p>需要如下这样才行，</p>
+<div class="highlight"><pre class="chroma">{{&#39;{&#39;}}% raw %}{{ some tag }}{{&#39;{&#39;}}% endraw %}
+{{&#39;{&#39;}}% raw %}{% some tag %}{{&#39;{&#39;}}% endraw %}
+或者
+{{&#39;{&#39;}}{ some tag }}
+{{&#39;{&#39;}}% some tag %}</pre></div>
+<p>其他的模板带语言，要输出自身的控制标签确实都不容易，但是Liquid已经不是不容易，而是复杂了。。我感觉，如果有两个停止解析的标志，比如说</p>
+<div class="highlight"><pre class="chroma">{! here is not parsed !}
+{@ here is not parsed @}</pre></div>
+<p>那么，如果有如果有显示<code>{! !}</code>，只需要<code>{@ {! !} @}</code>，目前，Liquid有标签<code>raw</code>和<code>literal</code>可以使用，但是我的试验结果是<code>literal</code>和<code>raw</code>似乎不太协调，不知什么原因，渲染结果总是与预想的结果不一致。。看了Liquid的issue，发现有可能是Jekyll的问题，也不清楚到底是怎么回事，不去想了。。</p>
+
+    </div>
+</div>
+</div>
+
+<h2 style="color: #777">评论</h2>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codevim" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>C&#43;&#43; on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/c--/</link>
+    <description>Recent content in C&#43;&#43; on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sat, 19 Sep 2015 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/c--/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>在C&#43;&#43;中实现Haskell的map函数</title>
+      <link>https://codevim.github.io/post/2015/2015-09-19-implement-haskell-map-function-in-cpp/</link>
+      <pubDate>Sat, 19 Sep 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2015/2015-09-19-implement-haskell-map-function-in-cpp/</guid>
+      <description>C++11中引入了lambda，类似如下的语法 [value](int x) -&amp;gt; int { return x * x; } 其中，[]中的部分，是捕获外界变量，()中的部分则是参数，-&amp;gt;表明返</description>
+    </item>
+    
+  </channel>
+</rss>

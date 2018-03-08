@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>用Rust写了一个简单的Web服务器 | 天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-single">
+    <div class="post">    
+    <h1 class="post-title">用Rust写了一个简单的Web服务器</h1>
+    <div class="post-meta">
+    <span class="post-date">2016.9.24</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/rust">Rust</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web%E6%9C%8D%E5%8A%A1%E5%99%A8">Web服务器</a>
+        </span>
+        
+    
+</div>
+    <div class="post-content">
+        
+
+<h2 id="rust">Rust</h2>
+
+<p>最近学了一阵Rust，这个语言的目的是系统编程，卖点是无GC的内存安全。为了实现这一点，Rust引入了所有权、借用、生命周期的概念。可以在编译器检查出可能的内存问题，如野指针、局部变量指针等等。不过这也对写程序造成了一定的困扰，对于move、borrow等如果理解的不是很到位，那必然要和编译器做长期的斗争。</p>
+
+<h2 id="web服务器">Web服务器</h2>
+
+<h3 id="骨架">骨架</h3>
+
+<p>Web服务器，实际上就是对socket的数据流的处理，监听端口，并对每个新的连接，开启一个新的线程进行处理。代码的骨架基本上是</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">match</span><span class="w"> </span><span class="n">TcpListener</span>::<span class="n">bind</span><span class="p">(</span><span class="s">&#34;127.0.0.1&#34;</span><span class="p">,</span><span class="w"> </span><span class="mi">9999</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="nb">Ok</span><span class="p">(</span><span class="n">listener</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">stream</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">listener</span><span class="p">.</span><span class="n">incoming</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="k">match</span><span class="w"> </span><span class="n">stream</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                    </span><span class="c1">// error, log, ignore
+</span><span class="c1"></span><span class="w">                </span><span class="p">},</span><span class="w">
+</span><span class="w">                </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">                    </span><span class="n">thread</span>::<span class="n">spawn</span><span class="p">(</span><span class="k">move</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">handle_client</span><span class="p">(</span><span class="n">s</span><span class="p">));</span><span class="w">
+</span><span class="w">                </span><span class="p">},</span><span class="w">
+</span><span class="w">            </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="p">}</span><span class="w">
+</span><span class="w">        </span><span class="n">drop</span><span class="p">(</span><span class="n">listener</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="p">},</span><span class="w">
+</span><span class="w">    </span><span class="nb">Err</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="c1">// error, log, ignore
+</span><span class="c1"></span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span></code></pre></div>
+<p>其中<code>thread::spawn(move || handle_client(s))</code>，开启新的线程，参数是一个闭包，<code>move</code>关键字表示将闭包所在环境的标量的所有权强行交给闭包。之后重点是<code>handle_client</code>中对于<code>TcpStream</code>的处理，也就是解析请求，并构造响应。读取请求。</p>
+
+<h3 id="解析请求">解析请求</h3>
+
+<p>一个HTTP的请求，格式是这样的</p>
+<div class="highlight"><pre class="chroma">METHOD URI VERSION
+Host: xxx
+other-header: xxx
+
+body</pre></div>
+<p>这个服务器目前只能处理GET和HEAD请求，并且只能处理静态文件，所有很多东西并没有做。比如querystring的解析、请求体的解析等等。各种header也只是解析，并没有真的使用。之后会慢慢完善，函数重点是</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">fn</span> <span class="nf">parse</span><span class="p">(</span><span class="n">stream</span>: <span class="kp">&amp;</span><span class="nc">mut</span><span class="w"> </span><span class="n">TcpStream</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nb">Option</span><span class="o">&lt;</span><span class="n">Request</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="k">mut</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Vec</span>::<span class="n">new</span><span class="p">();</span><span class="w">
+</span><span class="w">    </span><span class="n">Self</span>::<span class="n">get_request</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="k">mut</span><span class="w"> </span><span class="n">s</span><span class="p">);</span><span class="w">
+</span><span class="w">    </span><span class="k">match</span><span class="w"> </span><span class="nb">String</span>::<span class="n">from_utf8</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">        </span><span class="nb">Ok</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">            </span><span class="c1">// parse request line and header
+</span><span class="c1"></span><span class="w">        </span><span class="p">},</span><span class="w">
+</span><span class="w">        </span><span class="nb">Err</span><span class="p">(</span><span class="n">_</span><span class="p">)</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="nb">None</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="p">}</span><span class="w">
+</span><span class="w"></span><span class="p">}</span></code></pre></div>
+<p>如果解析失败，返回一个<code>None</code>，这是<code>Request</code>结构的一个静态方法。解析成功则打印日志，并根据请求构造响应。</p>
+
+<h3 id="构造响应">构造响应</h3>
+
+<p>响应的的格式为</p>
+<div class="highlight"><pre class="chroma">VERSION CODE PHRASE
+header: xxx
+other-header: xxx
+
+body</pre></div>
+<p>由于只能处理静态请求，实际上这里就是读取文件并.对于<code>HEAD</code>请求，只计算长度，没有响应体部分。</p>
+
+<p>目前的相应的结构为</p>
+<div class="highlight"><pre class="chroma"><code class="language-rust" data-lang="rust"><span class="k">struct</span> <span class="nc">Response</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="w">    </span><span class="n">head</span>: <span class="nb">String</span><span class="p">,</span><span class="w">
+</span><span class="w">    </span><span class="n">body</span>: <span class="nb">String</span>
+<span class="p">}</span></code></pre></div>
+<p>通过code、mime、content等拼接字符串，得到响应头部以及响应体。最后通过<code>TcpStream</code>发送出去。</p>
+
+<p>至此，这个web服务器就算是完成了。</p>
+
+<h2 id="最后">最后</h2>
+
+<p>Rust这个语言还是非常不熟，对于lifetime的理解也太行，所以通篇没有用到lifetime标记，遇到字符串都是用的String。另外，Rust目前并没有高性能的非阻塞IO以及异步IO，有一些库在做这方面的尝试。不过对这方面不熟，没有多做尝试。</p>
+
+<p>最后，项目的地址是<a href="https://github.com/iEverX/rock">https://github.com/iEverX/rock</a></p>
+
+    </div>
+</div>
+</div>
+
+<h2 style="color: #777">评论</h2>
+<div id="disqus_thread"></div>
+<script>
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "codevim" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

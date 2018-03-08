@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zhc-cn">
+<head>
+	<meta name="generator" content="Hugo 0.37" />
+    <meta charset="utf-8" />
+    <meta viewport="width=device-width, initial-scale=1" />
+
+    
+    <title>天外天 My Site</title>
+    
+
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/code.github.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="block-container">
+            <div id="header" class="header">
+    <div class="header-container">
+        <div class="brand">
+            <h1 class="u-link">
+                <a href="/">天外天 My Site</a>
+            </h1>
+        </div>
+        <div class="nav-container">
+            <div class="nav">
+                
+                <div class="u-link nav-item">
+                    <a href="/">home</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="/tags">tags</a>
+                </div>
+                
+                <div class="u-link nav-item">
+                    <a href="https://github.com">project</a>
+                </div>
+                
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</div>
+            
+<div class="block-index">
+    <div class="posts">
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2013/2013-04-09-install-gitlab/">安装GitLab</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2013.4.9</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/git">git</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/gitlab">GitLab</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/linux">Linux</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>在V2EX上面看了一个如何管理自己的代码的帖子，里面有个回答是使用gitlab，于是搜了一下。。可以这么说，gitlab是开源的github，可以在自己的电脑上搭一个私人的git托管服务，相当不错。对于自己来说，其实就是折腾啦，可以不用把所有的代码都扔到github上面，但是有个不好就是在自己的机器上面，一旦系统挂了，代码就没了。。</p>
+
+<p>安装就是跟着官方的<a href="https://github.com/gitlabhq/gitlabhq/blob/5-0-stable/doc/install/installation.md">安装文档</a>，一路下来就可以了，由于网络速度以及各种其他问题，我装了两天。需要提醒的一点是，文档里面，安装路径是<code>/home/git/gitlab</code>，建议不要修改，因为有些地方是硬编码了这个路径的，如果修改可能会导致网站不能跑起来。</p>
+
+<p>在安装过程中的需要<code>bundle install</code>的地方，由于众所周知的原因，建议把Gemfile中的地址修改为<code>http://ruby.taobao.org</code>，加快速度。</p>
+
+<p>在安装过程中，我遇到的一些问题:</p>
+
+<ul>
+<li>在Gemfile中有些这样的写法<code>require: :xxx</code>，如果<code>bundle install</code>出现问题，可以把这种写法改成<code>:require =&gt; xxx</code>。这个原因是ruby 的版本太老不支持新的语法（但是我的ruby是最新的也报错了。。）</li>
+<li>在执行<code>bundle install</code>时，提示需要 ruby的版本大于1.9.2，而实际上我的机器上ruby是1.9.3，这时执行<code>sudo apt-get install gem</code>之后重新执行改命令</li>
+<li>安装数据库时，未修改配置文件，导致登录数据库错误。这个只要修改了配置文件即可，注意应该修改<code>production</code>中的配置</li>
+</ul>
+
+<p>安装完成后，有个管理员账户</p>
+<div class="highlight"><pre class="chroma">email:    admin@local.host
+password: 5iveL!fe</pre></div>
+<p>如果要增加用户，只能通过管理员账户新建用户，不能自由注册，毕竟gitlab是私人的托管服务，面向的是小型的团队。</p>
+
+<p>装完之后用了一下，虽然和github很像，功能也比较齐全，和github还是有所不同。建立一个新的项目的时候，不会自动建立新的repo而是需要自己手动建立并push。。当然还有其他区别，在此不一一列举了</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2013/2013-03-20-a-sublime-text-plugin/">自己写sublime text插件</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2013.3.20</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/sublime-text">Sublime Text</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/sublime-text-2">Sublime Text 2</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E6%8F%92%E4%BB%B6">插件</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>起因是，自己写Python基本上使用sublime text 2。但是，文件头部的代码</p>
+<div class="highlight"><pre class="chroma">#! /usr/bin/env python
+# -*- coding: utf-8 -*-</pre></div>
+<p>如果每次都要敲的话，很麻烦。而如果不敲的化，一旦涉及中文，又会报错，就产生了写了一个插件的想法。。问题好久了，直到今天才动手，惭愧一下。。</p>
+
+<p>思路应该是比较简单，就是判断文件类型，然后在头部插入特定的字符串。于是乎，开始在网上查找sumblime text 2的API还有插件开发教程。这是<a href="http://www.sublimetext.com/docs/2/api_reference.html">API文档</a>，<a href="http://ux.etao.com/posts/549">中文翻译版</a>，看一下Default里面的自带插件，就可以动手了。</p>
+
+<p>最初的代码中，字符串是硬编码的。后来，则是从模板文件中读取字符串。在这一步，遇到了一个很诡异的问题，是这样的：模板文件保存在templates文件夹下面，在HeadTemplate.py中（我的插件的名字是HeadTemplate），</p>
+<div class="highlight"><pre class="chroma">def get_tpl_file(settings, filename):
+    template_root = settings.get(&#39;template_root&#39;)
+    path = os.path.join(os.path.dirname(__file__), template_root)
+    return os.path.join(path, filename)</pre></div>
+<p>但是这个函数的返回的结果是<code>/home/username/templates/filename</code>，而实际上，我认为应该返回的是<code>/home/username/.config/sublime-text-2/Packages/HeadTemplate/templates/filename</code>。打印<code>os.path.abspath(__file__)</code>，得到的结果是<code>/home/username</code>也就是我的家目录。开始以为是由于隐藏文件夹的缘故，不过试验之后，发现与之无关。为什么会有这个结果，具体原因到现在我也还弄不清楚。不过，解决方案倒是找到了，感谢SErHo的<a href="https://github.com/SerhoLiu/SublimeNFFT">代码</a></p>
+<div class="highlight"><pre class="chroma">PACKAGE_NAME = &#39;HeadTemplate&#39;
+PACKAGES_PATH = sublime.packages_path()
+
+def get_tpl_file(settings, filename):
+    template_root = os.path.join(
+                    PACKAGES_PATH, 
+                    PACKAGE_NAME, 
+                    settings.get(&#39;template_root&#39;))
+    return os.path.join(template_root, filename)</pre></div>
+<p>在其他就没有什么了，按部就班的写下来就好了。代码放在了github上，<a href="https://github.com/iEverX/HeadTemplate">https://github.com/iEverX/HeadTemplate</a></p>
+
+<p>算上空行不到50，却写了一个下午。。</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2013/2013-03-09-traversing-dom-tree-with-javascript/">Javascript遍历DOM树</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2013.3.9</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/javascript">Javascript</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jquery">jQuery</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/dom">DOM</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jekyll">Jekyll</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/liquid">Liquid</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>这个博客是利用Jekyll在github pages上搭建的，显示在首页的文章，如果用<code>{{ post.content | truncate: 200 }}</code>，原有的格式不能完全保持，且有时在最后会有乱码。而<code>{{ post.content | truncatewords: 50 }}</code>也有不能保持格式的问题，而且对于中文来说，word的概念大概就变成了句子，截取的长度不能确定。本来<a href="https://github.com/MattHall/truncatehtml">truncatehtml</a>这个插件可以解决格式保持的问题，但是出于安全的考虑，github pages不允许运行插件，所以。。。</p>
+
+<p>这个问题有很长时间了，今天闲的没事，用js写了一下。就是遍历DOM树，叠加文本节点的长度，当长度达到既定长度时，其后所有的节点修改style为<code>display: none</code>，用jQuery就是<code>hide()</code>，具体到自己的博客，代码如下，</p>
+<div class="highlight"><pre class="chroma">$(function() {
+    function traverse($node, len, maxCount) {
+      var reachMaxCount = len &gt; maxCount;
+      if (reachMaxCount) {
+        $node.hide();
+      }
+      var $contents = $node.contents();
+      for (var i = 0; i &lt; $contents.length; ++i) {
+        if (reachMaxCount) {
+          $contents.eq(i).hide();
+          continue;
+        }
+        if ($contents[i].nodeType == 3) { // TextNode
+          var tmp = len;
+          var s = $contents[i].nodeValue;
+          len += s.length;
+          reachMaxCount = len &gt; maxCount;
+          if (reachMaxCount) {
+            $contents[i].nodeValue = s.substring(0, maxCount - tmp);
+          }
+        }
+        else if ($contents[i].nodeType == 1) { // Element
+          len = traverse($contents.eq(i), len, maxCount);
+        }
+      }
+      return len;
+    }
+
+    $(&#39;.post_at_index&#39;).each(function() {
+      traverse($(this), 0, {{ site.description_length }});
+      var thisUrl = $(this).siblings().first().children().attr(&#39;href&#39;);
+      $(this).after(&#39;\n&lt;a href=&#34;&#39; + thisUrl + &#39;&#34; rel=&#34;nofollow&#34;&gt;&#39; + &#39;Read More ...&lt;/a&gt;&#39;);
+    });
+});</pre></div>
+<p>对于js，我都会使用jQuery，这个同样如此，需要jQuery的支持。在最后加上了了read more，指向页面。写完之后，发现代码不长，不过却花了我一个下午的时间，主要是对js太不熟悉了，上网各种查，开始是用的<code>children()</code>这个方法，但是这个不能处理很好，后来改成了<code>contents()</code>，不过已经浪费了很长时间了。。</p>
+
+<p>另外吐槽一下Liquid这个模板，规避标签太麻烦了，比如要打一个</p>
+<div class="highlight"><pre class="chroma">{{ some tag }}
+{% some tag %}</pre></div>
+<p>需要如下这样才行，</p>
+<div class="highlight"><pre class="chroma">{{&#39;{&#39;}}% raw %}{{ some tag }}{{&#39;{&#39;}}% endraw %}
+{{&#39;{&#39;}}% raw %}{% some tag %}{{&#39;{&#39;}}% endraw %}
+或者
+{{&#39;{&#39;}}{ some tag }}
+{{&#39;{&#39;}}% some tag %}</pre></div>
+<p>其他的模板带语言，要输出自身的控制标签确实都不容易，但是Liquid已经不是不容易，而是复杂了。。我感觉，如果有两个停止解析的标志，比如说</p>
+<div class="highlight"><pre class="chroma">{! here is not parsed !}
+{@ here is not parsed @}</pre></div>
+<p>那么，如果有如果有显示<code>{! !}</code>，只需要<code>{@ {! !} @}</code>，目前，Liquid有标签<code>raw</code>和<code>literal</code>可以使用，但是我的试验结果是<code>literal</code>和<code>raw</code>似乎不太协调，不知什么原因，渲染结果总是与预想的结果不一致。。看了Liquid的issue，发现有可能是Jekyll的问题，也不清楚到底是怎么回事，不去想了。。</p>
+
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2013/2013-03-03-custom-jinja2-module-in-webpy/">web.py中自定义jinja2模块</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2013.3.3</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/python">Python</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jinja2">jinja2</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web%E5%BC%80%E5%8F%91">web开发</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/web.py">web.py</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>web.py是一个轻量级的Python web开发框架，不过自带的模板自己很不习惯，就换成了jinja2。web.py已经封装了jinja2的接口，很简单</p>
+<div class="highlight"><pre class="chroma">from web.contrib.template import render_jinja
+render = render_jinja(&#39;templates&#39;, encoding=&#39;utf-8&#39;)</pre></div>
+<p>之后就和自带模板一样使用了。web.py中使用jinja2的源代码如下</p>
+<div class="highlight"><pre class="chroma">class render_jinja:
+    &#34;&#34;&#34;Rendering interface to Jinja2 Templates
+
+    Example:
+
+        render= render_jinja(&#39;templates&#39;)
+        render.hello(name=&#39;jinja2&#39;)
+    &#34;&#34;&#34;
+    def __init__(self, *a, **kwargs):
+        extensions = kwargs.pop(&#39;extensions&#39;, [])
+        globals = kwargs.pop(&#39;globals&#39;, {})
+
+        from jinja2 import Environment,FileSystemLoader
+        self._lookup = Environment(loader=FileSystemLoader(*a, **kwargs), extensions=extensions)
+        self._lookup.globals.update(globals)
+
+    def __getattr__(self, name):
+        # Assuming all templates end with .html
+        path = name + &#39;.html&#39;
+        t = self._lookup.get_template(path)
+        return t.render</pre></div>
+<p>在<code>__getattr__</code>函数中，<code>path = name + '.html'</code>使得只能访问同级目录下的模板。同时，还不方便使用自定义函数。在其基础之上，稍作修改即可，如下</p>
+<div class="highlight"><pre class="chroma">class RenderJinja2:
+
+    postfix = (&#39;.html&#39;, &#39;&#39;, &#39;htm&#39;, &#39;tpl&#39;)
+
+    def __init__(self, *a, **kwargs):
+        extensions = kwargs.pop(&#39;extensions&#39;, [])
+        globals = kwargs.pop(&#39;globals&#39;, {})
+        registers = kwargs.pop(&#39;registers&#39;, {})
+
+        self._lookup = Environment(loader=FileSystemLoader(*a, **kwargs), extensions=extensions)
+        self._lookup.globals.update(globals)
+        self._lookup.globals.update(registers)
+
+    def render(self, path, **kwargs):
+        for fix in self.postfix:
+            realpath = path + fix
+            try:
+                t = self._lookup.get_template(realpath)
+                return t.render(**kwargs)
+            except:
+                pass
+        raise TemplateNotFound
+
+    def __getattr__(self, name):
+        path = name + &#39;.html&#39;
+        t = self._lookup.get_template(path)
+        return t.render</pre></div>
+<p>现在，自定义的函数、变量可以通过register这个字典传入，渲染时也有两种方式，</p>
+<div class="highlight"><pre class="chroma"># 通过register传入自定义的函数或者变量，这里为了方便，使用了locals()
+render = RenderJinja2(&#39;path/to/templats&#39;, encoding=&#39;utf-8&#39;, registers=locals())
+
+# 渲染时
+render.render(&#39;path&#39;, **kwargs) # 新加的render
+render.post(**kwargs) # 原先的方式，通过 __getattr__</pre></div>
+            </div>
+        </div>
+        
+        <div class="post">
+            <h1 class="post-title u-link">
+                <a href="https://codevim.github.io/post/2013/2013-02-27-highlight-code-with-google-code-prettify/">Jekyll中使用google-code-prettify高亮代码</a>
+            </h1>
+            <div class="post-meta">
+    <span class="post-date">2013.2.27</span>
+    
+        &middot;
+        
+        <span class="post-tag u-link">
+            <a href="/tags/jekyll">Jekyll</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/%E4%BB%A3%E7%A0%81%E9%AB%98%E4%BA%AE">代码高亮</a>
+        </span>
+        
+        <span class="post-tag u-link">
+            <a href="/tags/google-code-prettify">google-code-prettify</a>
+        </span>
+        
+    
+</div>
+            <div class="post-content">
+                <p>这个博客，到现在换了好几个代码高亮的工具，之前的SyntaxHIghlighter虽然漂亮，无奈加载太慢，只能舍弃了。现在用的这个是google-code-prettfy，效果也相当不错。最重要的是，非常小，加载速度比SyntaxHighlighter快得多，而且，可以直接使用markdown的语法去写代码。</p>
+
+<p>首先需要两个文件，prettify.js和prettify.css，自己去官网去下。把这两个放到模板中，如下</p>
+<div class="highlight"><pre class="chroma">&lt;link href=&#34;{{ ASSET_PATH }}/google-code-prettify/desert.css&#34; rel=&#34;stylesheet&#34; type=&#34;text/css&#34; media=&#34;all&#34;&gt;
+&lt;script type=&#34;text/javascript&#34; src=&#34;{{ ASSET_PATH }}/google-code-prettify/prettify.js&#34;&gt;&lt;/script&gt;</pre></div>
+<p>考虑到加载速度，最好js写到文档末尾，body闭合标签之前，css写到头部</p>
+
+<p>之后，还需要加上如下代码，用于识别并高亮代码块，这个需要使用jQuery</p>
+<div class="highlight"><pre class="chroma">$(function() {
+  window.prettyPrint &amp;&amp; prettyPrint();
+});</pre></div>
+<p>现在，就可以使用<code>&lt;pre&gt;&lt;/pre&gt;</code>标签进行高亮了，</p>
+<div class="highlight"><pre class="chroma">&lt;pre class=&#34;prettyPrint&#34;&gt;
+// code here
+&lt;/pre&gt;</pre></div>
+<p>但这样会有些问题，就是在书写html代码的时候，html标签会被浏览器认为是标签而不是代码的字符。而markdown的语法写的代码其实已经解决了这个问题，所以，我们可以利用如下的js代码，来避免自己用<code>&lt;pre&gt;&lt;/pre&gt;</code>写代码所出现的问题，同样需要jQuery支持</p>
+<div class="highlight"><pre class="chroma">$(function() {
+  $(&#39;pre&#39;).addClass(&#39;prettyprint linenums&#39;).attr(&#39;style&#39;, &#39;overflow:auto&#39;);
+});</pre></div>
+<p>这样之后，就没有问题了，可以直接用markdown的前置4空格来写代码了。其中<code>addClass('prettyprint linenums')</code>的<code>linenums</code>是添加行号的意思。默认只显示第5、10、15&hellip;行，可以在css文件中li的格式添加<code>list-style-type: decimal;</code>，以显示全部行号</p>
+
+<p>另外，如果博客中有用bootstrap，其中对<code>pre</code>有如下几句</p>
+<div class="highlight"><pre class="chroma">white-space:pre;white-space:pre-wrap;word-break:break-all;word-wrap:break-word;</pre></div>
+<p>这会使得pre中的代码自动换行，而不是溢出形成滚动条。如果不希望如此，可以注释掉。就看个人的喜好了。如果是滚动条，默认的滚动太难看，可以修改一下样式，看一下<a href="http://www.javascript100.com/?p=756">这篇文章</a></p>
+
+            </div>
+        </div>
+        
+    </div>
+    
+
+<ul class="pagination">
+    
+    <li>
+        <a href="/" aria-label="First"><span aria-hidden="true">&laquo;&laquo;</span></a>
+    </li>
+    
+    <li
+    >
+    <a href="/page/3/" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+    </li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/">1</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/2/">2</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/3/">3</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    class="active"><a href="/page/4/">4</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/5/">5</a></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li class="disabled"><span aria-hidden="true">&hellip;</span></li>
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
+    <li
+    ><a href="/page/7/">7</a></li>
+    
+    
+    <li
+    >
+    <a href="/page/5/" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+    </li>
+    
+    <li>
+        <a href="/page/7/" aria-label="Last"><span aria-hidden="true">&raquo;&raquo;</span></a>
+    </li>
+    
+</ul>
+
+</div>
+
+            <div id="footer">
+    <div class="footer-container">
+        <div class="powered-by">Powered by Hugo</div>
+        <div class="theme">theme - ink</div>
+    </div>
+</div>
+        </div>
+    </div>
+</body>
+</html>

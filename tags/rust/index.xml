@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rust on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/rust/</link>
+    <description>Recent content in Rust on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sat, 24 Sep 2016 15:00:00 +0800</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>用Rust写了一个简单的Web服务器</title>
+      <link>https://codevim.github.io/post/2016/2016-09-24-rust-web-server/</link>
+      <pubDate>Sat, 24 Sep 2016 15:00:00 +0800</pubDate>
+      
+      <guid>https://codevim.github.io/post/2016/2016-09-24-rust-web-server/</guid>
+      <description>Rust 最近学了一阵Rust，这个语言的目的是系统编程，卖点是无GC的内存安全。为了实现这一点，Rust引入了所有权、借用、生命周期的概念。可以在</description>
+    </item>
+    
+  </channel>
+</rss>

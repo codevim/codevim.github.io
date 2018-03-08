@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>语义 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E8%AF%AD%E4%B9%89/</link>
+    <description>Recent content in 语义 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Wed, 20 Jun 2012 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E8%AF%AD%E4%B9%89/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Python的逻辑运算</title>
+      <link>https://codevim.github.io/post/2012/2012-06-20-logic-operation-in-python/</link>
+      <pubDate>Wed, 20 Jun 2012 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2012/2012-06-20-logic-operation-in-python/</guid>
+      <description>Python的逻辑运算(and，or，not)与C/C++、Java等语言不太一样。这些语言的逻辑运算返回的值都是bool值，而Python</description>
+    </item>
+    
+  </channel>
+</rss>

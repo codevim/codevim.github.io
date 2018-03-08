@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>胡言乱语 on 天外天 My Site</title>
+    <link>https://codevim.github.io/tags/%E8%83%A1%E8%A8%80%E4%B9%B1%E8%AF%AD/</link>
+    <description>Recent content in 胡言乱语 on 天外天 My Site</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zhc-cn</language>
+    <lastBuildDate>Sun, 20 Dec 2015 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://codevim.github.io/tags/%E8%83%A1%E8%A8%80%E4%B9%B1%E8%AF%AD/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>年末瞎扯淡</title>
+      <link>https://codevim.github.io/post/2015/2015-12-20-just-talk/</link>
+      <pubDate>Sun, 20 Dec 2015 00:00:00 +0000</pubDate>
+      
+      <guid>https://codevim.github.io/post/2015/2015-12-20-just-talk/</guid>
+      <description>前几天糊里糊涂的就开完题了，开题之前就知道不做这个题目。现在对于论文很烦，不知道怎么搞。根本就不是写论文的料。 Angular2的beta版出</description>
+    </item>
+    
+  </channel>
+</rss>
